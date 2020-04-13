@@ -2,13 +2,10 @@
     <div class="gooods__edit">
         <el-form :model="goodsForm" ref="goodsForm" label-width="120px" :rules="rules">
             <el-form-item label="商品名" prop="goodsName">
-                <el-input v-model="goodsForm.goodsName" placeholder="商品名" style="width:400px"></el-input>
+                <el-input v-model="goodsForm.goodsName" placeholder="商品名" style="width: 400px" maxlength="50" show-word-limit></el-input>
             </el-form-item>
             <el-form-item label="商品类目" prop="goodsCategoryId">
-                <el-select v-model="goodsForm.goodsCategoryId" placeholder="请选择活动区域" style="width:200px">
-                    <el-option label="区域一" value="shanghai"></el-option>
-                    <el-option label="区域二" value="beijing"></el-option>
-                </el-select>
+                <el-cascader v-model="goodsForm.goodsCategoryId" :options="goodsCategoryList" style="width: 400px" placeholder="请选择省 / 市 / 区"></el-cascader>
             </el-form-item>
             <el-form-item label="划线价（元）">
                 <el-input v-model="goodsForm.originalPrice" style="width:200px"></el-input>
@@ -17,7 +14,7 @@
                 <el-checkbox v-model="goodsForm.isMoreSpec" size="large"></el-checkbox>
                 <span class="tip"> 启用商品规格后，商品的价格及库存以商品规格为准</span>
             </el-form-item>
-            <div v-show="goodsForm.isMoreSpec" style="padding: 0 45px;">
+            <div v-show="goodsForm.isMoreSpec" style="padding: 0 40px 0 60px;">
                 <template v-if="specifications.length != 0">
                     <div class="spec" v-for="(spec,index) in specifications" :key="index" v-show="goodsForm.isMoreSpec">
                         <div>
@@ -102,9 +99,10 @@ export default {
                     { required: true, message: '请输入商品名称', trigger: 'blur' },
                 ],
                 goodsCategoryId: [
-                    { required: true, message: '请选择商品类目', trigger: 'change' }
+                    { type: 'array', required: true, message: '请选择商品类目', trigger: 'change' }
                 ],
             },
+            goodsCategoryList: [],
             isPerPersonLimit: false,
             goodsForm: {
                 perPersonLimit: 0,
@@ -141,6 +139,7 @@ export default {
         }
     },
     created() {
+        this.getCategoryData();
         this.specifications = this._specifications
         this.specifications = [];
         this.specPrices = [];
@@ -166,12 +165,38 @@ export default {
         }
     },
     methods: {
+        getCategoryData() {
+            API.goodsCategoryGetTree().then((res)=> {
+                res.data.forEach(item => {
+                    let children;
+                    if(item.childCategoryList) {
+                        children = [];
+                        item.childCategoryList.forEach(child => {
+                            let _children;
+                            if(child.childCategoryList) {
+                                _children = [];
+                                child.childCategoryList.forEach(_child => {
+                                    _children.push({value: _child.id, label: _child.categoryName});
+                                });
+                                children.push({value: child.id, label: child.categoryName, children: _children});
+                            } else{
+                                children.push({value: child.id, label: child.categoryName});
+                            }
+                            
+                        });
+                    }
+                    this.goodsCategoryList.push({value: item.id, label: item.categoryName, children: children});
+                });
+            });
+        },
         onSubmit(formName) {
             this.$refs[formName].validate((valid) => {
                 if (valid) {
                     if(this.isPerPersonLimit) {
                         this.goodsForm.perPersonLimit = 0;
                     }
+                    let category = this.goodsForm.goodsCategoryId;
+                    this.goodsForm.goodsCategoryId = category[category.length - 1];
                     let arr = this.tableData;
                     for (var i = 0; i < arr.length; i++) {
                         let specValue = '';
@@ -185,7 +210,11 @@ export default {
                         arr[i].price = arr[i].prices.price;
                         arr[i].inventory = arr[i].prices.inventory;
                     }
-                    this.goodsForm.skuList = arr;
+                    if(this.goodsForm.isMoreSpec) {
+                        this.goodsForm.skuList = arr;
+                    } else {
+                        this.goodsForm.skuList = [];
+                    }
 
                     console.log(this.goodsForm);
                 } else {

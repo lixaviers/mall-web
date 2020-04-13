@@ -42,6 +42,14 @@ module.exports = {
                   '/api-user': '',
               }
           },
+          '/api-goods': {
+              target: 'http://localhost:10011',
+              ws: false,
+              changOrigin: true,
+              pathRewrite: {
+                  '/api-goods': '',
+              }
+          },
       }
     },
     pluginOptions: {

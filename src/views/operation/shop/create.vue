@@ -59,7 +59,6 @@
                     });
                     // this.categoryList = res.data;
                 });
-
             },
             select(val) {
                 if(val) {
