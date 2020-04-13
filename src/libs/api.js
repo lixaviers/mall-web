@@ -51,6 +51,9 @@ export default {
     goodsCategoryGetTree() {
         return Http.get(`${goods}/b/goodsCategory/getTree`);
     },
+    goodsAdd(params) {
+        return Http.post(`${goods}/b/goods/add`, params);
+    },
 
 
 }

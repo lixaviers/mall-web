@@ -4,8 +4,8 @@
             <el-form-item label="商品名" prop="goodsName">
                 <el-input v-model="goodsForm.goodsName" placeholder="商品名" style="width: 400px" maxlength="50" show-word-limit></el-input>
             </el-form-item>
-            <el-form-item label="商品类目" prop="goodsCategoryId">
-                <el-cascader v-model="goodsForm.goodsCategoryId" :options="goodsCategoryList" style="width: 400px" placeholder="请选择省 / 市 / 区"></el-cascader>
+            <el-form-item label="商品类目" prop="goodsCategorySelectList">
+                <el-cascader v-model="goodsForm.goodsCategorySelectList" :options="goodsCategoryList" style="width: 400px" placeholder="请选择省 / 市 / 区"></el-cascader>
             </el-form-item>
             <el-form-item label="划线价（元）">
                 <el-input v-model="goodsForm.originalPrice" style="width:200px"></el-input>
@@ -20,19 +20,19 @@
                         <div>
                             <el-row class="mt10 mb10 group__title name">
                                 规格名:
-                                <el-input placeholder="请输入规格名，例如：尺寸" v-model.trim.lazy="spec.type" style="width:200px"></el-input>
+                                <el-input placeholder="请输入规格名，例如：尺寸" v-model.trim.lazy="spec.specificationName" style="width:200px"></el-input>
                                 <el-button type="warning" :disabled="specifications.length === 1" @click="deleteType(index)" style="margin-left: 10px;">删除规格</el-button>
                             </el-row>
-                            <el-row class="group__title" v-show="spec.type">
+                            <el-row class="group__title" v-show="spec.specificationName">
                                 规格值:
                                 <el-input placeholder="请输入规格值，例如：XXL" v-model.trim.lazy="newSpecName[index]" style="width:200px" />
-                                <el-button @click="addSpec(spec.children, newSpecName[index], index)" style="margin-left: 10px;">添加</el-button>
+                                <el-button @click="addSpec(spec.specificationValues, newSpecName[index], index)" style="margin-left: 10px;">添加</el-button>
                             </el-row>
-                            <el-row class="group__title" v-show="spec.children.length > 0">
+                            <el-row class="group__title" v-show="spec.specificationValues.length > 0">
                                 规格值:
-                                <div v-for="(specName,index) in spec.children" :key="index" class="value">
-                                        <el-input placeholder="" v-model.lazy="spec.children[index]" @blur="modiSpec(specName,spec.children,index)" :disabled="false" style="width:200px;">
-                                            <el-button  slot="append" @click="deleteSpec(index,spec.children)">删除</el-button>
+                                <div v-for="(specValue,index) in spec.specificationValues" :key="index" class="value">
+                                        <el-input placeholder="" v-model.lazy="spec.specificationValues[index]" @blur="modiSpec(specName,spec.specificationValues,index)" :disabled="false" style="width:200px;">
+                                            <el-button  slot="append" @click="deleteSpec(index,spec.specificationValues)">删除</el-button>
                                         </el-input>
                                 </div>
                                 <br>
@@ -41,14 +41,14 @@
                         </div>
                     </div>
                 </template>
-                <el-button type="primary" @click="addType">添加规格</el-button>
+                <el-button type="primary" @click="addSpecificationName">添加规格</el-button>
                 <div class="mt20 mb20">
                     <template>
                         <!-- specifications不存在直接不渲染 -->
                         <template v-if="specifications.length != 0">
                             <!-- <el-table :data="tableData" border :style="{width:specifications.length*100+402+'px'}" key='aTable'> -->
                             <el-table :data="tableData" border key='aTable' :span-method="arraySpanMethod">
-                                <el-table-column v-for="(item, index) in specifications" :key="index" :prop="'spec' + index" :label="item.type">
+                                <el-table-column v-for="(item, index) in specifications" :key="index" :prop="'spec' + index" :label="item.specificationName">
                                 </el-table-column>
                                 <el-table-column prop="prices.price" label="价格" min-width="200" :render-header="renderHeader">
                                     <template slot-scope="scope">
@@ -98,7 +98,7 @@ export default {
                 goodsName: [
                     { required: true, message: '请输入商品名称', trigger: 'blur' },
                 ],
-                goodsCategoryId: [
+                goodsCategorySelectList: [
                     { type: 'array', required: true, message: '请选择商品类目', trigger: 'change' }
                 ],
             },
@@ -107,6 +107,7 @@ export default {
             goodsForm: {
                 perPersonLimit: 0,
                 goodsName: '',
+                goodsCategorySelectList: null,
                 goodsCategoryId: '',
                 price: '',
                 inventory: '',
@@ -147,8 +148,8 @@ export default {
         if (this.specifications.length == 0) {
             // 初始化规格数据
             var obj = {}
-            obj.type = "";
-            obj.children = []
+            obj.specificationName = "";
+            obj.specificationValues = []
             this.specifications.push(obj)
 
           // 初始化价格数据
@@ -189,13 +190,14 @@ export default {
                 });
             });
         },
+        // 提交
         onSubmit(formName) {
             this.$refs[formName].validate((valid) => {
                 if (valid) {
                     if(this.isPerPersonLimit) {
                         this.goodsForm.perPersonLimit = 0;
                     }
-                    let category = this.goodsForm.goodsCategoryId;
+                    let category = this.goodsForm.goodsCategorySelectList;
                     this.goodsForm.goodsCategoryId = category[category.length - 1];
                     let arr = this.tableData;
                     for (var i = 0; i < arr.length; i++) {
@@ -212,11 +214,13 @@ export default {
                     }
                     if(this.goodsForm.isMoreSpec) {
                         this.goodsForm.skuList = arr;
+                        this.goodsForm.goodsSpecificationList = this.specifications;
                     } else {
-                        this.goodsForm.skuList = [];
+                        this.goodsForm.skuList = [{price: this.goodsForm.price, inventory: this.goodsForm.inventory}];
                     }
 
                     console.log(this.goodsForm);
+                    API.goodsAdd(this.goodsForm).then((res)=> {});
                 } else {
                     return false;
                 }
@@ -276,11 +280,11 @@ export default {
             spec[index] = specName;
             this.mySpecPrices(this.specCombinations())
         },
-        addType() {
+        addSpecificationName() {
             // alert()
             var obj = {}
-            obj.type = "";
-            obj.children = []
+            obj.specificationName = "";
+            obj.specificationValues = []
             this.specifications.push(obj)
         },
         addSpec(spec, newSpecName, index) {
@@ -319,7 +323,7 @@ export default {
         specCombinations() {
             var specArr = [];
             for(var i = 0; i < this.specifications.length; i++) {
-                var arr = this.specifications[i].children;
+                var arr = this.specifications[i].specificationValues;
                 if (arr.length == 0) {
                     arr = ['']
                 }
