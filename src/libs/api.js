@@ -51,9 +51,17 @@ export default {
     goodsCategoryGetTree() {
         return Http.get(`${goods}/b/goodsCategory/getTree`);
     },
+    // 创建商品
     goodsAdd(params) {
         return Http.post(`${goods}/b/goods/add`, params);
     },
-
+    // 查询商品
+    goodsQuery(params) {
+        return Http.post(`${goods}/b/goods/query`, params);
+    },
+    // 查询商品
+    goodsGet(id) {
+        return Http.get(`${goods}/b/goods/get/${id}`);
+    },
 
 }

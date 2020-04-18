@@ -5,7 +5,7 @@
                 <el-input v-model="goodsForm.goodsName" placeholder="商品名" style="width: 400px" maxlength="50" show-word-limit></el-input>
             </el-form-item>
             <el-form-item label="商品类目" prop="goodsCategorySelectList">
-                <el-cascader v-model="goodsForm.goodsCategorySelectList" :options="goodsCategoryList" style="width: 400px" placeholder="请选择省 / 市 / 区"></el-cascader>
+                <el-cascader v-model="goodsForm.goodsCategorySelectList" :options="goodsCategoryList" style="width: 400px" placeholder="请选择"></el-cascader>
             </el-form-item>
             <el-form-item label="划线价（元）">
                 <el-input v-model="goodsForm.originalPrice" style="width:200px"></el-input>
@@ -80,7 +80,9 @@
             <el-form-item v-if="isPerPersonLimit" label="限购">
                 <el-input-number style="width:200px" :min="0" :max="99999999" :precision="0" v-model="goodsForm.perPersonLimit" />&nbsp;个
             </el-form-item>
-            
+            <el-form-item label="商品详情">
+                <tinymce :width="595" :height="300" v-model="goodsForm.description"></tinymce>
+            </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="onSubmit('goodsForm')">立即创建</el-button>
                 <el-button>取消</el-button>
@@ -91,7 +93,9 @@
 <script>
 import Util from '../../libs/util';
 import API from '../../libs/api.js';
+import Tinymce from '@/components/tinymce'
 export default {
+    components: {Tinymce},
     data () {
         return {
             rules: {
@@ -105,6 +109,7 @@ export default {
             goodsCategoryList: [],
             isPerPersonLimit: false,
             goodsForm: {
+                description: '',
                 perPersonLimit: 0,
                 goodsName: '',
                 goodsCategorySelectList: null,

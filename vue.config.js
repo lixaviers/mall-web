@@ -50,6 +50,14 @@ module.exports = {
                   '/api-goods': '',
               }
           },
+          '/api-file': {
+              target: 'http://localhost:10003',
+              ws: false,
+              changOrigin: true,
+              pathRewrite: {
+                  '/api-file': '',
+              }
+          },
       }
     },
     pluginOptions: {
