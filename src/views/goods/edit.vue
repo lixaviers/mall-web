@@ -20,19 +20,19 @@
                         <div>
                             <el-row class="mt10 mb10 group__title name">
                                 规格名:
-                                <el-input placeholder="请输入规格名，例如：尺寸" v-model.trim.lazy="spec.specificationName" style="width:200px"></el-input>
+                                <el-input placeholder="请输入规格名，例如：尺寸" v-model.trim.lazy="spec.name" style="width:200px"></el-input>
                                 <el-button type="warning" :disabled="specifications.length === 1" @click="deleteType(index)" style="margin-left: 10px;">删除规格</el-button>
                             </el-row>
-                            <el-row class="group__title" v-show="spec.specificationName">
+                            <el-row class="group__title" v-show="spec.name">
                                 规格值:
                                 <el-input placeholder="请输入规格值，例如：XXL" v-model.trim.lazy="newSpecName[index]" style="width:200px" />
-                                <el-button @click="addSpec(spec.specificationValues, newSpecName[index], index)" style="margin-left: 10px;">添加</el-button>
+                                <el-button @click="addSpec(spec.values, newSpecName[index], index)" style="margin-left: 10px;">添加</el-button>
                             </el-row>
-                            <el-row class="group__title" v-show="spec.specificationValues.length > 0">
+                            <el-row class="group__title" v-show="spec.values.length > 0">
                                 规格值:
-                                <div v-for="(specValue,index) in spec.specificationValues" :key="index" class="value">
-                                        <el-input placeholder="" v-model.lazy="spec.specificationValues[index]" @blur="modiSpec(specName,spec.specificationValues,index)" :disabled="false" style="width:200px;">
-                                            <el-button  slot="append" @click="deleteSpec(index,spec.specificationValues)">删除</el-button>
+                                <div v-for="(specValue,index) in spec.values" :key="index" class="value">
+                                        <el-input placeholder="" v-model.lazy="spec.values[index]" @blur="modiSpec(specName,spec.values,index)" :disabled="false" style="width:200px;">
+                                            <el-button  slot="append" @click="deleteSpec(index,spec.values)">删除</el-button>
                                         </el-input>
                                 </div>
                                 <br>
@@ -48,7 +48,7 @@
                         <template v-if="specifications.length != 0">
                             <!-- <el-table :data="tableData" border :style="{width:specifications.length*100+402+'px'}" key='aTable'> -->
                             <el-table :data="tableData" border key='aTable' :span-method="arraySpanMethod">
-                                <el-table-column v-for="(item, index) in specifications" :key="index" :prop="'spec' + index" :label="item.specificationName">
+                                <el-table-column v-for="(item, index) in specifications" :key="index" :prop="'spec' + index" :label="item.name">
                                 </el-table-column>
                                 <el-table-column prop="prices.price" label="价格" min-width="200" :render-header="renderHeader">
                                     <template slot-scope="scope">
@@ -80,7 +80,7 @@
             <el-form-item v-if="isPerPersonLimit" label="限购">
                 <el-input-number style="width:200px" :min="0" :max="99999999" :precision="0" v-model="goodsForm.perPersonLimit" />&nbsp;个
             </el-form-item>
-            <el-form-item label="商品详情">
+            <el-form-item label="商品详情" prop="description">
                 <tinymce :width="595" :height="300" v-model="goodsForm.description"></tinymce>
             </el-form-item>
             <el-form-item>
@@ -105,10 +105,14 @@ export default {
                 goodsCategorySelectList: [
                     { type: 'array', required: true, message: '请选择商品类目', trigger: 'change' }
                 ],
+                description: [
+                    {required: true, message: '请输入商品详情', trigger: 'blur' }
+                ],
             },
             goodsCategoryList: [],
             isPerPersonLimit: false,
             goodsForm: {
+                id: '',
                 description: '',
                 perPersonLimit: 0,
                 goodsName: '',
@@ -145,36 +149,44 @@ export default {
         }
     },
     created() {
-        this.getCategoryData();
-        this.specifications = this._specifications
-        this.specifications = [];
-        this.specPrices = [];
-
-        if (this.specifications.length == 0) {
+        
+        let id = this.$route.query.id;
+        if(id) {
+            API.goodsGet(id).then((res)=> {
+                this.goodsForm = res.data;
+                this.specifications = res.data.specificationList;
+                if(this.goodsForm.isMoreSpec) {
+                    // 多规格
+                    let arr = [], skuList = res.data.skuList;
+                    for (var i = 0; i < skuList.length; i++) {
+                        arr.push({prices: {inventory: skuList[i].inventory, price: skuList[i].price}});
+                        let specValue = skuList[i].specValue.split(",");
+                        arr[i].specifications = specValue;
+                        for (var j = 0; j < specValue.length; j++) {
+                            (arr[i]['spec' + j]) = specValue[j];
+                        }
+                    }
+                    this.specPrices = arr;
+                }
+                this.getCategoryData();
+            });
+        } else {
             // 初始化规格数据
             var obj = {}
-            obj.specificationName = "";
-            obj.specificationValues = []
+            obj.name = "";
+            obj.values = []
             this.specifications.push(obj)
-
-          // 初始化价格数据
-            var _obj = [{}]
-            _obj[0].specifications = ['']
-            _obj[0].prices = {
-                price: 0,
-                inventory: 0
-            }
-            this.specPrices = _obj
             this.goodsForm.isMoreSpec = false;
-        } else {
-            this.goodsForm.isMoreSpec = true;
+            this.specPrices = [];
+            this.getCategoryData();
         }
+
     },
     methods: {
         getCategoryData() {
             API.goodsCategoryGetTree().then((res)=> {
-                res.data.forEach(item => {
-                    let children;
+                let children, goodsCategorySelectList = [];
+                res.data.forEach((item, index) => {
                     if(item.childCategoryList) {
                         children = [];
                         item.childCategoryList.forEach(child => {
@@ -182,21 +194,39 @@ export default {
                             if(child.childCategoryList) {
                                 _children = [];
                                 child.childCategoryList.forEach(_child => {
+                                    if(this.check(_child)) {
+                                        goodsCategorySelectList = [item.id, child.id, _child.id];
+                                    }
                                     _children.push({value: _child.id, label: _child.categoryName});
                                 });
                                 children.push({value: child.id, label: child.categoryName, children: _children});
                             } else{
+                                if(this.check(child)) {
+                                    goodsCategorySelectList = [item.id, child.id];
+                                }
                                 children.push({value: child.id, label: child.categoryName});
                             }
-                            
                         });
+                    } else {
+                        if(this.check(item)) {
+                            goodsCategorySelectList = [item.id];
+                        }
                     }
                     this.goodsCategoryList.push({value: item.id, label: item.categoryName, children: children});
                 });
+                this.goodsForm.goodsCategorySelectList = goodsCategorySelectList;
+                console.log('this.goodsForm.goodsCategorySelectList', goodsCategorySelectList)
             });
+        },
+        check(item) {
+            if(this.goodsForm.goodsCategoryId && item.id === this.goodsForm.goodsCategoryId) {
+                return true;
+            }
+            return false;
         },
         // 提交
         onSubmit(formName) {
+                console.log('this.goodsForm.goodsCategorySelectList', this.goodsForm.goodsCategorySelectList)
             this.$refs[formName].validate((valid) => {
                 if (valid) {
                     if(this.isPerPersonLimit) {
@@ -288,8 +318,8 @@ export default {
         addSpecificationName() {
             // alert()
             var obj = {}
-            obj.specificationName = "";
-            obj.specificationValues = []
+            obj.name = "";
+            obj.values = []
             this.specifications.push(obj)
         },
         addSpec(spec, newSpecName, index) {
@@ -328,7 +358,7 @@ export default {
         specCombinations() {
             var specArr = [];
             for(var i = 0; i < this.specifications.length; i++) {
-                var arr = this.specifications[i].specificationValues;
+                var arr = this.specifications[i].values;
                 if (arr.length == 0) {
                     arr = ['']
                 }

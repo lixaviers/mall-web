@@ -61,8 +61,7 @@ export default {
     methods: {
         // 编辑商品
         handleEdit(row) {
-            API.goodsGet(row.id).then((res)=> {
-            });
+            this.$router.push({name:'goodsEdit',query:{id: row.id}});
         },
         // 变换每页条数
         handleSizeChange(val) {
