@@ -5,7 +5,7 @@
                 <el-input v-model="goodsForm.goodsName" placeholder="商品名" style="width: 400px" maxlength="50" show-word-limit></el-input>
             </el-form-item>
             <el-form-item label="商品类目" prop="goodsCategorySelectList">
-                <el-cascader v-model="goodsForm.goodsCategorySelectList" :options="goodsCategoryList" style="width: 400px" placeholder="请选择"></el-cascader>
+                <el-cascader :props="props" v-model="goodsForm.goodsCategorySelectList" :options="goodsCategoryList" style="width: 400px" placeholder="请选择"></el-cascader>
             </el-form-item>
             <el-form-item label="划线价（元）">
                 <el-input v-model="goodsForm.originalPrice" style="width:200px"></el-input>
@@ -31,7 +31,7 @@
                             <el-row class="group__title" v-show="spec.values.length > 0">
                                 规格值:
                                 <div v-for="(specValue,index) in spec.values" :key="index" class="value">
-                                        <el-input placeholder="" v-model.lazy="spec.values[index]" @blur="modiSpec(specName,spec.values,index)" :disabled="false" style="width:200px;">
+                                        <el-input placeholder="" v-model.lazy="spec.values[index]" @blur="modiSpec(specValue,spec.values,index)" :disabled="false" style="width:200px;">
                                             <el-button  slot="append" @click="deleteSpec(index,spec.values)">删除</el-button>
                                         </el-input>
                                 </div>
@@ -84,7 +84,7 @@
                 <tinymce :width="595" :height="300" v-model="goodsForm.description"></tinymce>
             </el-form-item>
             <el-form-item>
-                <el-button type="primary" @click="onSubmit('goodsForm')">立即创建</el-button>
+                <el-button type="primary" :loading="loading" @click="onSubmit('goodsForm')">{{buttonText}}</el-button>
                 <el-button>取消</el-button>
             </el-form-item>
         </el-form>
@@ -109,6 +109,11 @@ export default {
                     {required: true, message: '请输入商品详情', trigger: 'blur' }
                 ],
             },
+            props: {
+                label: 'categoryName',
+                value: 'id',
+                children: 'childCategoryList'
+            },
             goodsCategoryList: [],
             isPerPersonLimit: false,
             goodsForm: {
@@ -124,11 +129,10 @@ export default {
                 skuList: [],
                 isMoreSpec: null,
             },
-            arr: [1, 3, 5],
-            visible2: false,
-            // from backend
+            loading: false,
+            buttonText: '立即创建',
+            arr: [],
             specifications: [],
-            // from backend
             specPrices: [],
             newSpecName: ['', '']
         }
@@ -149,11 +153,28 @@ export default {
         }
     },
     created() {
-        
+        // 商品id，用来判断新增还是编辑
         let id = this.$route.query.id;
         if(id) {
+            this.buttonText = '立即保存';
+            // 获取商品详情
             API.goodsGet(id).then((res)=> {
-                this.goodsForm = res.data;
+                // this.goodsForm = res.data;
+                // 这里不能直接赋值对象，否则会触发[商品类目]的校验
+                this.goodsForm.id = res.data.id;
+                this.goodsForm.description = res.data.description;
+                this.goodsForm.perPersonLimit = res.data.perPersonLimit;
+                if(this.goodsForm.perPersonLimit > 0) {
+                    this.isPerPersonLimit = true;
+                }
+                this.goodsForm.goodsName = res.data.goodsName;
+                this.goodsForm.goodsCategoryId = res.data.goodsCategoryId;
+                this.goodsForm.price = res.data.price;
+                this.goodsForm.inventory = res.data.inventory;
+                this.goodsForm.originalPrice = res.data.originalPrice;
+                this.goodsForm.skuList = res.data.skuList;
+                this.goodsForm.isMoreSpec = res.data.isMoreSpec;
+                this.getCategoryData();
                 this.specifications = res.data.specificationList;
                 if(this.goodsForm.isMoreSpec) {
                     // 多规格
@@ -162,13 +183,13 @@ export default {
                         arr.push({prices: {inventory: skuList[i].inventory, price: skuList[i].price}});
                         let specValue = skuList[i].specValue.split(",");
                         arr[i].specifications = specValue;
+                        arr[i].id = skuList[i].id
                         for (var j = 0; j < specValue.length; j++) {
                             (arr[i]['spec' + j]) = specValue[j];
                         }
                     }
                     this.specPrices = arr;
                 }
-                this.getCategoryData();
             });
         } else {
             // 初始化规格数据
@@ -183,53 +204,45 @@ export default {
 
     },
     methods: {
+        // 回显商品类目
+        getCategoryCheck() {
+            let id = this.goodsForm.goodsCategoryId;
+            this.goodsCategoryList.forEach((item, index) => {
+                if(id === item.id) {
+                    this.goodsForm.goodsCategorySelectList = [item.id];
+                    return;
+                }
+                if(item.childCategoryList) {
+                    item.childCategoryList.forEach(child => {
+                        if(id === child.id) {
+                            this.goodsForm.goodsCategorySelectList = [item.id, child.id];
+                            return;
+                        }
+                        if(child.childCategoryList) {
+                            child.childCategoryList.forEach(_child => {
+                                if(id === _child.id) {
+                                    this.goodsForm.goodsCategorySelectList = [item.id, child.id, _child.id];
+                                    return;
+                                }
+                            })
+                        }
+                    })
+                }
+            });
+        }, 
+        // 获取商品类目
         getCategoryData() {
             API.goodsCategoryGetTree().then((res)=> {
-                let children, goodsCategorySelectList = [];
-                res.data.forEach((item, index) => {
-                    if(item.childCategoryList) {
-                        children = [];
-                        item.childCategoryList.forEach(child => {
-                            let _children;
-                            if(child.childCategoryList) {
-                                _children = [];
-                                child.childCategoryList.forEach(_child => {
-                                    if(this.check(_child)) {
-                                        goodsCategorySelectList = [item.id, child.id, _child.id];
-                                    }
-                                    _children.push({value: _child.id, label: _child.categoryName});
-                                });
-                                children.push({value: child.id, label: child.categoryName, children: _children});
-                            } else{
-                                if(this.check(child)) {
-                                    goodsCategorySelectList = [item.id, child.id];
-                                }
-                                children.push({value: child.id, label: child.categoryName});
-                            }
-                        });
-                    } else {
-                        if(this.check(item)) {
-                            goodsCategorySelectList = [item.id];
-                        }
-                    }
-                    this.goodsCategoryList.push({value: item.id, label: item.categoryName, children: children});
-                });
-                this.goodsForm.goodsCategorySelectList = goodsCategorySelectList;
-                console.log('this.goodsForm.goodsCategorySelectList', goodsCategorySelectList)
+                this.goodsCategoryList = res.data;
+                this.getCategoryCheck();
             });
-        },
-        check(item) {
-            if(this.goodsForm.goodsCategoryId && item.id === this.goodsForm.goodsCategoryId) {
-                return true;
-            }
-            return false;
         },
         // 提交
         onSubmit(formName) {
-                console.log('this.goodsForm.goodsCategorySelectList', this.goodsForm.goodsCategorySelectList)
             this.$refs[formName].validate((valid) => {
                 if (valid) {
-                    if(this.isPerPersonLimit) {
+                    this.loading = true;
+                    if(!this.isPerPersonLimit) {
                         this.goodsForm.perPersonLimit = 0;
                     }
                     let category = this.goodsForm.goodsCategorySelectList;
@@ -253,9 +266,17 @@ export default {
                     } else {
                         this.goodsForm.skuList = [{price: this.goodsForm.price, inventory: this.goodsForm.inventory}];
                     }
-
                     console.log(this.goodsForm);
-                    API.goodsAdd(this.goodsForm).then((res)=> {});
+                    API.goodsAdd(this.goodsForm).then((res)=> {
+                        if(this.goodsForm.id) {
+                            Util.messageSuccess("保存成功");
+                        } else {
+                            Util.messageSuccess("创建成功");
+                        }
+                    }).finally((res) => {
+                        if(this.loading)this.loading = false;
+                        this.$router.push({name:'goodsList'});
+                    });
                 } else {
                     return false;
                 }
@@ -264,6 +285,7 @@ export default {
         arraySpanMethod({ row, column, rowIndex, columnIndex }) {
             
         },
+        // 批量修改
         renderHeader(h, { column, $index }) {
             const t = this;
             let tableData = t.tableData;
@@ -271,7 +293,7 @@ export default {
                 h("span", column.label),
                 h("i", {
                     class: "el-icon-plus",
-                    style: "color:#62BFC4;margin-left:5px;cursor: pointer;",
+                    style: "color:#17b3a3;margin-left:5px;cursor: pointer;",
                     on: {
                         click: function() {
                             t.$prompt("", "批量修改本列", {
@@ -346,7 +368,7 @@ export default {
                 const array = [];
                 last.forEach(par1 => {
                     current.forEach(par2 => {
-                    array.push(par1 + ',' + par2)
+                        array.push(par1 + ',' + par2)
                     })
                 });
                 return array
@@ -366,7 +388,7 @@ export default {
             }
             return this.createAry(specArr);
         },
-        // 规格价格数据 local
+        // 规格价格数据
         // 数据更新
         mySpecPrices(specCombinations) {
             var arrWra = []
@@ -383,7 +405,8 @@ export default {
                         return element.specifications + "" === arr[i] + "";
                     });
                     if (oldItem.length) {
-                        obj.prices = oldItem[0].prices
+                        obj.prices = oldItem[0].prices;
+                        obj.id = oldItem[0].id;
                     } else {
                         obj.prices = {
                             price: 0,

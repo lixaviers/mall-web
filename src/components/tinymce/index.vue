@@ -2,10 +2,8 @@
     <div class="tinymce__container">
         <textarea :id="tinymceId" />
         <div class="tinymce__btn__container">
-            <el-upload icon='el-icon-upload' action="/api-file/upload" :on-success="handleSuccess"
-                :show-file-list="false"
-            >
-                <el-button type="primary">上传图片</el-button>
+            <el-upload action="/api-file/upload" :on-success="handleSuccess" :show-file-list="false">
+                <el-button type="primary"><i class="el-icon-upload"></i>上传图片</el-button>
             </el-upload>
         </div>
     </div>
@@ -106,21 +104,21 @@ export default {
                 default_link_target: '_blank',
                 link_title: false,
                 init_instance_callback: editor => {
-                if (_this.value) {
-                    editor.setContent(_this.value)
-                }
-                _this.hasInit = true
-                editor.on('NodeChange Change KeyUp SetContent', () => {
-                    this.hasChange = true
-                    this.$emit('input', editor.getContent())
-                })
+                    if (_this.value) {
+                        editor.setContent(_this.value)
+                    }
+                    _this.hasInit = true
+                    editor.on('NodeChange Change KeyUp SetContent', () => {
+                        this.hasChange = true
+                        this.$emit('input', editor.getContent())
+                    })
                 }
             })
         },
         destroyTinymce() {
-        if (window.tinymce.get(this.tinymceId)) {
-            window.tinymce.get(this.tinymceId).destroy()
-        }
+            if (window.tinymce.get(this.tinymceId)) {
+                window.tinymce.get(this.tinymceId).destroy()
+            }
         },
         setContent(value) {
             window.tinymce.get(this.tinymceId).setContent(value)
@@ -144,7 +142,7 @@ export default {
     }
     .tinymce__btn__container {
         position: absolute;
-        right: 10px;
+        left: 400px;
         top: 2px;
     }
 </style>

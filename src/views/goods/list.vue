@@ -52,6 +52,7 @@ export default {
                 total: 0,
                 goodsNameLike: '',
                 sales: '',
+                orderBy: 'id DESC',
             }
         }
     },

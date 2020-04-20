@@ -53,7 +53,7 @@ export default {
     },
     // 创建商品
     goodsAdd(params) {
-        return Http.post(`${goods}/b/goods/add`, params);
+        return Http.post(`${goods}/b/goods/addOrUpdate`, params);
     },
     // 查询商品
     goodsQuery(params) {
