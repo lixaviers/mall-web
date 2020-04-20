@@ -1,96 +1,98 @@
 <template>
     <div class="gooods__edit">
-        <el-form :model="goodsForm" ref="goodsForm" label-width="120px" :rules="rules">
-            <el-form-item label="商品名" prop="goodsName">
-                <el-input v-model="goodsForm.goodsName" placeholder="商品名" style="width: 400px" maxlength="50" show-word-limit></el-input>
-            </el-form-item>
-            <el-form-item label="商品类目" prop="goodsCategorySelectList">
-                <el-cascader :props="props" v-model="goodsForm.goodsCategorySelectList" :options="goodsCategoryList" style="width: 400px" placeholder="请选择"></el-cascader>
-            </el-form-item>
-            <el-form-item label="划线价（元）">
-                <el-input v-model="goodsForm.originalPrice" style="width:200px"></el-input>
-            </el-form-item>
-            <el-form-item label="启用规格">
-                <el-checkbox v-model="goodsForm.isMoreSpec" size="large"></el-checkbox>
-                <span class="tip"> 启用商品规格后，商品的价格及库存以商品规格为准</span>
-            </el-form-item>
-            <div v-show="goodsForm.isMoreSpec" style="padding: 0 40px 0 60px;">
-                <template v-if="specifications.length != 0">
-                    <div class="spec" v-for="(spec,index) in specifications" :key="index" v-show="goodsForm.isMoreSpec">
-                        <div>
-                            <el-row class="mt10 mb10 group__title name">
-                                规格名:
-                                <el-input placeholder="请输入规格名，例如：尺寸" v-model.trim.lazy="spec.name" style="width:200px"></el-input>
-                                <el-button type="warning" :disabled="specifications.length === 1" @click="deleteType(index)" style="margin-left: 10px;">删除规格</el-button>
-                            </el-row>
-                            <el-row class="group__title" v-show="spec.name">
-                                规格值:
-                                <el-input placeholder="请输入规格值，例如：XXL" v-model.trim.lazy="newSpecName[index]" style="width:200px" />
-                                <el-button @click="addSpec(spec.values, newSpecName[index], index)" style="margin-left: 10px;">添加</el-button>
-                            </el-row>
-                            <el-row class="group__title" v-show="spec.values.length > 0">
-                                规格值:
-                                <div v-for="(specValue,index) in spec.values" :key="index" class="value">
-                                        <el-input placeholder="" v-model.lazy="spec.values[index]" @blur="modiSpec(specValue,spec.values,index)" :disabled="false" style="width:200px;">
-                                            <el-button  slot="append" @click="deleteSpec(index,spec.values)">删除</el-button>
-                                        </el-input>
-                                </div>
-                                <br>
-                                <br>
-                            </el-row>
+        <el-card shadow="always">
+            <el-form :model="goodsForm" ref="goodsForm" label-width="120px" :rules="rules">
+                <el-form-item label="商品名" prop="goodsName">
+                    <el-input v-model="goodsForm.goodsName" placeholder="商品名" style="width: 400px" maxlength="50" show-word-limit></el-input>
+                </el-form-item>
+                <el-form-item label="商品类目" prop="goodsCategorySelectList">
+                    <el-cascader :props="props" v-model="goodsForm.goodsCategorySelectList" :options="goodsCategoryList" style="width: 400px" placeholder="请选择"></el-cascader>
+                </el-form-item>
+                <el-form-item label="划线价（元）">
+                    <el-input v-model="goodsForm.originalPrice" style="width:200px"></el-input>
+                </el-form-item>
+                <el-form-item label="启用规格">
+                    <el-checkbox v-model="goodsForm.isMoreSpec" size="large"></el-checkbox>
+                    <span class="tip"> 启用商品规格后，商品的价格及库存以商品规格为准</span>
+                </el-form-item>
+                <div v-show="goodsForm.isMoreSpec" style="padding: 0 40px 0 60px;">
+                    <template v-if="specifications.length != 0">
+                        <div class="spec" v-for="(spec,index) in specifications" :key="index" v-show="goodsForm.isMoreSpec">
+                            <div>
+                                <el-row class="mt10 mb10 group__title name">
+                                    规格名:
+                                    <el-input placeholder="请输入规格名，例如：尺寸" v-model.trim.lazy="spec.name" style="width:200px"></el-input>
+                                    <el-button type="warning" :disabled="specifications.length === 1" @click="deleteType(index)" style="margin-left: 10px;">删除规格</el-button>
+                                </el-row>
+                                <el-row class="group__title" v-show="spec.name">
+                                    规格值:
+                                    <el-input placeholder="请输入规格值，例如：XXL" v-model.trim.lazy="newSpecName[index]" style="width:200px" />
+                                    <el-button @click="addSpec(spec.values, newSpecName[index], index)" style="margin-left: 10px;">添加</el-button>
+                                </el-row>
+                                <el-row class="group__title" v-show="spec.values.length > 0">
+                                    规格值:
+                                    <div v-for="(specValue,index) in spec.values" :key="index" class="value">
+                                            <el-input placeholder="" v-model.lazy="spec.values[index]" @blur="modiSpec(specValue,spec.values,index)" :disabled="false" style="width:200px;">
+                                                <el-button  slot="append" @click="deleteSpec(index,spec.values)">删除</el-button>
+                                            </el-input>
+                                    </div>
+                                    <br>
+                                    <br>
+                                </el-row>
+                            </div>
                         </div>
-                    </div>
-                </template>
-                <el-button type="primary" @click="addSpecificationName">添加规格</el-button>
-                <div class="mt20 mb20">
-                    <template>
-                        <!-- specifications不存在直接不渲染 -->
-                        <template v-if="specifications.length != 0">
-                            <!-- <el-table :data="tableData" border :style="{width:specifications.length*100+402+'px'}" key='aTable'> -->
-                            <el-table :data="tableData" border key='aTable' :span-method="arraySpanMethod">
-                                <el-table-column v-for="(item, index) in specifications" :key="index" :prop="'spec' + index" :label="item.name">
-                                </el-table-column>
-                                <el-table-column prop="prices.price" label="价格" min-width="200" :render-header="renderHeader">
-                                    <template slot-scope="scope">
-                                        <el-input-number size="mini" :min="0" :max="99999999.99" :precision="2" v-model="scope.row.prices.price"></el-input-number>
-                                    </template>
-                                </el-table-column>
-                                <el-table-column prop="prices.inventory" label="库存" min-width="200" :render-header="renderHeader">
-                                    <template slot-scope="scope">
-                                        <el-input-number size="mini" :min="0" :max="99999999" :precision="0" v-model="scope.row.prices.inventory"></el-input-number>
-                                    </template>
-                                </el-table-column>
-                            </el-table>
-                        </template>
                     </template>
+                    <el-button type="primary" @click="addSpecificationName">添加规格</el-button>
+                    <div class="mt20 mb20">
+                        <template>
+                            <!-- specifications不存在直接不渲染 -->
+                            <template v-if="specifications.length != 0">
+                                <!-- <el-table :data="tableData" border :style="{width:specifications.length*100+402+'px'}" key='aTable'> -->
+                                <el-table :data="tableData" border key='aTable' :span-method="arraySpanMethod">
+                                    <el-table-column v-for="(item, index) in specifications" :key="index" :prop="'spec' + index" :label="item.name">
+                                    </el-table-column>
+                                    <el-table-column prop="prices.price" label="价格" min-width="200" :render-header="renderHeader">
+                                        <template slot-scope="scope">
+                                            <el-input-number size="mini" :min="0" :max="99999999.99" :precision="2" v-model="scope.row.prices.price"></el-input-number>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column prop="prices.inventory" label="库存" min-width="200" :render-header="renderHeader">
+                                        <template slot-scope="scope">
+                                            <el-input-number size="mini" :min="0" :max="99999999" :precision="0" v-model="scope.row.prices.inventory"></el-input-number>
+                                        </template>
+                                    </el-table-column>
+                                </el-table>
+                            </template>
+                        </template>
+                    </div>
                 </div>
-            </div>
-            
-            <div v-show="!goodsForm.isMoreSpec">
-                <el-form-item label="价格（元）">
-                    <el-input-number style="width:200px" :min="0" :max="99999999.99" :precision="2" v-model="goodsForm.price" />
+                
+                <div v-show="!goodsForm.isMoreSpec">
+                    <el-form-item label="价格（元）">
+                        <el-input-number style="width:200px" :min="0" :max="99999999.99" :precision="2" v-model="goodsForm.price" />
+                    </el-form-item>
+                    <el-form-item label="库存">
+                        <el-input-number style="width:200px" :min="0" :max="99999999" :precision="0" v-model="goodsForm.inventory" />
+                    </el-form-item>
+                </div>
+                <el-form-item label="限购">
+                    <el-checkbox v-model="isPerPersonLimit" size="large">限制每人可购买数量</el-checkbox>
                 </el-form-item>
-                <el-form-item label="库存">
-                    <el-input-number style="width:200px" :min="0" :max="99999999" :precision="0" v-model="goodsForm.inventory" />
+                <el-form-item v-if="isPerPersonLimit" label="限购">
+                    <el-input-number style="width:200px" :min="0" :max="99999999" :precision="0" v-model="goodsForm.perPersonLimit" />&nbsp;个
                 </el-form-item>
-            </div>
-            <el-form-item label="限购">
-                <el-checkbox v-model="isPerPersonLimit" size="large">限制每人可购买数量</el-checkbox>
-            </el-form-item>
-            <el-form-item v-if="isPerPersonLimit" label="限购">
-                <el-input-number style="width:200px" :min="0" :max="99999999" :precision="0" v-model="goodsForm.perPersonLimit" />&nbsp;个
-            </el-form-item>
-            <el-form-item label="快递运费">
-                <el-input-number style="width:200px" :min="0" :max="99999999" :precision="2" v-model="goodsForm.expressFreight" />&nbsp;元
-            </el-form-item>
-            <el-form-item label="商品详情" prop="description">
-                <tinymce :width="595" :height="300" v-model="goodsForm.description"></tinymce>
-            </el-form-item>
-            <el-form-item>
-                <el-button type="primary" :loading="loading" @click="onSubmit('goodsForm')">{{buttonText}}</el-button>
-                <el-button>取消</el-button>
-            </el-form-item>
-        </el-form>
+                <el-form-item label="快递运费">
+                    <el-input-number style="width:200px" :min="0" :max="99999999" :precision="2" v-model="goodsForm.expressFreight" />&nbsp;元
+                </el-form-item>
+                <el-form-item label="商品详情" prop="description">
+                    <tinymce :width="595" :height="300" v-model="goodsForm.description"></tinymce>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" :loading="loading" @click="onSubmit('goodsForm')">{{buttonText}}</el-button>
+                    <el-button>取消</el-button>
+                </el-form-item>
+            </el-form>
+        </el-card>
     </div>
 </template>
 <script>

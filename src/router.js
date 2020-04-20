@@ -5,6 +5,13 @@ import Util from './libs/util';
 
 Vue.use(ElementUI, { size: 'small', zIndex: 3000 });
 
+/**
+ * 重写路由的push方法
+ */
+const routerPush = Router.prototype.push;
+Router.prototype.push = function push(location) {
+  return routerPush.call(this, location).catch(error=> error)
+}
 // 全局路由(无需嵌套上左右整体布局)
 const globalRoutes = [
     {
@@ -63,11 +70,10 @@ const menuRouters = [
                 component: (resolve) => require(['./views/member.vue'], resolve)
             },
             {
-                path: '/goods', name: 'goods', component: (resolve) => require(['./views/index.vue'], resolve),
+                path: '/goods', name: 'goods', redirect: {name: 'goodsList'}, component: (resolve) => require(['./views/index.vue'], resolve),
                 meta: {
                     title: '商品', subTitle: '商品管理',
                 },
-                redirect: {name: 'goodsList'},
                 children: [
                     {
                         path: 'list', name: 'goodsList', component: (resolve) => require(['./views/goods/list.vue'], resolve),
@@ -86,25 +92,21 @@ const menuRouters = [
                 ]
             },
             {
-                path: 'store',
-                name: 'store',
-                meta: {
-                    title: '店铺',
-                    subTitle: '店铺管理',
+                path: 'shop', name: 'store',  redirect: {name: 'storeInfo'}, component: (resolve) => require(['./views/index.vue'], resolve),
+                meta: { 
+                    title: '店铺', subTitle: '店铺管理', 
                 },
-                redirect: {name: 'storeList'},
-                component: (resolve) => require(['./views/store.vue'], resolve),
                 children: [
                     {
-                        path: 'list', name: 'storeList', component: (resolve) => require(['./views/store.vue'], resolve),
+                        path: 'info', name: 'storeInfo', component: (resolve) => require(['./views/operation/shop/info.vue'], resolve),
                         meta: {
-                            title: '店铺1', isMenu: true, parentName: 'store',
+                            title: '店铺信息', isMenu: true, parentName: 'store',
                         }
                     },
                     {
-                        path: 'list1', name: 'storeList1', component: (resolve) => require(['./views/store.vue'], resolve),
+                        path: 'edit', name: 'storeEdit', component: (resolve) => require(['./views/operation/shop/edit.vue'], resolve),
                         meta: {
-                            title: '店铺1111', isMenu: true, parentName: 'store',
+                            title: '编辑基本信息', isMenu: false, parentName: 'store', activeName: 'storeInfo',
                         }
                     },
                 ]

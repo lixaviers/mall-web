@@ -1,41 +1,43 @@
 <template>
     <div>
-        <el-row>
-            <el-button type="primary" @click="$router.push({name: 'goodsEdit'});">发布商品</el-button>
-        </el-row>
-        <el-form :inline="true" :model="query" class="mt20">
-            <el-form-item label="商品名称">
-                <el-input v-model="query.goodsNameLike" placeholder="商品名称"></el-input>
-            </el-form-item>
-            <el-form-item>
-                <el-button type="primary" @click="getGoodsList">查询</el-button>
-            </el-form-item>
-        </el-form>
-        <el-table
-            :data="goodsList"
-            style="width: 100%"
-        >
-            <el-table-column prop="goodsName" label="商品名称"></el-table-column>
-            <el-table-column prop="viewCount" label="浏览量" sortable width="100"></el-table-column>
-            <el-table-column prop="inventory" label="库存" sortable width="100"></el-table-column>
-            <el-table-column prop="sales" label="销量" sortable width="100"></el-table-column>
-            <el-table-column prop="createTime" label="创建时间" sortable width="150"></el-table-column>
-            <el-table-column label="操作" width="120">
-                <template slot-scope="scope">
-                    <el-button @click="handleEdit(scope.row)">编辑</el-button>
-                </template>
-            </el-table-column>
-        </el-table>
-        <el-pagination
-        class="mt20"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page.sync="query.pageNo"
-        :page-sizes="[10, 20, 50, 100]"
-        :page-size="query.pageSize"
-        layout="total, sizes, prev, pager, next"
-        :total="query.total">
-        </el-pagination>
+        <el-card shadow="always">
+            <el-row>
+                <el-button type="primary" @click="$router.push({name: 'goodsEdit'});">发布商品</el-button>
+            </el-row>
+            <el-form :inline="true" :model="query" class="mt20">
+                <el-form-item label="商品名称">
+                    <el-input v-model="query.goodsNameLike" placeholder="商品名称"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="getGoodsList">查询</el-button>
+                </el-form-item>
+            </el-form>
+            <el-table
+                :data="goodsList"
+                style="width: 100%"
+            >
+                <el-table-column prop="goodsName" label="商品名称"></el-table-column>
+                <el-table-column prop="viewCount" label="浏览量" sortable width="100"></el-table-column>
+                <el-table-column prop="inventory" label="库存" sortable width="100"></el-table-column>
+                <el-table-column prop="sales" label="销量" sortable width="100"></el-table-column>
+                <el-table-column prop="createTime" label="创建时间" sortable width="150"></el-table-column>
+                <el-table-column label="操作" width="120">
+                    <template slot-scope="scope">
+                        <el-button @click="handleEdit(scope.row)">编辑</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <el-pagination
+            class="mt20"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page.sync="query.pageNo"
+            :page-sizes="[10, 20, 50, 100]"
+            :page-size="query.pageSize"
+            layout="total, sizes, prev, pager, next"
+            :total="query.total">
+            </el-pagination>
+        </el-card>
     </div>
 </template>
 

@@ -21,6 +21,10 @@ export default {
     operationShopList() {
         return Http.get(`${operation}/b/shop/list`);
     },
+    // 店铺信息
+    operationShopInfo() {
+        return Http.get(`${operation}/b/shop/info`);
+    },
     // 选择店铺
     operationSelectShop(id) {
         return Http.get(`${operation}/b/shop/select/${id}`);

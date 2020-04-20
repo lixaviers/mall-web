@@ -112,6 +112,7 @@ export default {
         },
         // 通过menuId与动态(菜单)路由进行匹配跳转至指定路由
         gotoRouteHandle (name) {
+            console.log(name)
             this.$router.push({ name: name })
         },
         action(command) {
