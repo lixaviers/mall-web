@@ -80,6 +80,9 @@
             <el-form-item v-if="isPerPersonLimit" label="限购">
                 <el-input-number style="width:200px" :min="0" :max="99999999" :precision="0" v-model="goodsForm.perPersonLimit" />&nbsp;个
             </el-form-item>
+            <el-form-item label="快递运费">
+                <el-input-number style="width:200px" :min="0" :max="99999999" :precision="2" v-model="goodsForm.expressFreight" />&nbsp;元
+            </el-form-item>
             <el-form-item label="商品详情" prop="description">
                 <tinymce :width="595" :height="300" v-model="goodsForm.description"></tinymce>
             </el-form-item>
@@ -128,6 +131,7 @@ export default {
                 originalPrice: '',
                 skuList: [],
                 isMoreSpec: null,
+                expressFreight: 0,
             },
             loading: false,
             buttonText: '立即创建',
@@ -174,6 +178,7 @@ export default {
                 this.goodsForm.originalPrice = res.data.originalPrice;
                 this.goodsForm.skuList = res.data.skuList;
                 this.goodsForm.isMoreSpec = res.data.isMoreSpec;
+                this.goodsForm.expressFreight = res.data.expressFreight;
                 this.getCategoryData();
                 this.specifications = res.data.specificationList;
                 if(this.goodsForm.isMoreSpec) {
