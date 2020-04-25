@@ -25,9 +25,13 @@ export default {
     operationShopInfo() {
         return Http.get(`${operation}/b/shop/info`);
     },
-    // 选择店铺
-    operationSelectShop(id) {
-        return Http.get(`${operation}/b/shop/select/${id}`);
+    // 店铺信息
+    operationShopInfo() {
+        return Http.get(`${operation}/b/shop/info`);
+    },
+    // 修改店铺信息
+    operationShopUpdate(params) {
+        return Http.post(`${operation}/b/shop/update`, params);
     },
 
 

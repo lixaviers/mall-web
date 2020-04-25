@@ -47,12 +47,10 @@ const globalRoutes = [
 ]
 const menuRouters = [
     {
-        path: '/',
+        path: '/', name: '', redirect: {name: 'home'}, component: (resolve) => require(['./views/main.vue'], resolve),
         meta: {
             title: '首页'
         },
-        name: {path: 'home'},
-        component: (resolve) => require(['./views/main.vue'], resolve),
         children: [
             {
                 path: '/home', name: 'home', component: (resolve) => require(['./views/home.vue'], resolve),
@@ -92,13 +90,13 @@ const menuRouters = [
                 ]
             },
             {
-                path: 'shop', name: 'store',  redirect: {name: 'storeInfo'}, component: (resolve) => require(['./views/index.vue'], resolve),
+                path: 'shop', name: 'store',  redirect: {name: 'shopInfo'}, component: (resolve) => require(['./views/index.vue'], resolve),
                 meta: { 
                     title: '店铺', subTitle: '店铺管理', 
                 },
                 children: [
                     {
-                        path: 'info', name: 'storeInfo', component: (resolve) => require(['./views/operation/shop/info.vue'], resolve),
+                        path: 'info', name: 'shopInfo', component: (resolve) => require(['./views/operation/shop/info.vue'], resolve),
                         meta: {
                             title: '店铺信息', isMenu: true, parentName: 'store',
                         }
@@ -106,7 +104,7 @@ const menuRouters = [
                     {
                         path: 'edit', name: 'storeEdit', component: (resolve) => require(['./views/operation/shop/edit.vue'], resolve),
                         meta: {
-                            title: '编辑基本信息', isMenu: false, parentName: 'store', activeName: 'storeInfo',
+                            title: '编辑基本信息', isMenu: false, parentName: 'store', activeName: 'shopInfo',
                         }
                     },
                 ]
