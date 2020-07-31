@@ -85,11 +85,11 @@
                     <el-input-number style="width:200px" :min="0" :max="99999999" :precision="2" v-model="goodsForm.expressFreight" />&nbsp;元
                 </el-form-item>
                 <el-form-item label="商品详情" prop="description">
-                    <tinymce :width="595" :height="300" v-model="goodsForm.description"></tinymce>
+                    <tinymce :width="995" :height="300" v-model="goodsForm.description"></tinymce>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" :loading="loading" @click="onSubmit('goodsForm')">{{buttonText}}</el-button>
-                    <el-button>取消</el-button>
+                    <el-button @click="$router.push({name:'goodsList'})">取消</el-button>
                 </el-form-item>
             </el-form>
         </el-card>
@@ -231,6 +231,14 @@ export default {
                                     this.goodsForm.goodsCategorySelectList = [item.id, child.id, _child.id];
                                     return;
                                 }
+                                if(_child.childCategoryList) {
+                                    _child.childCategoryList.forEach(_lastChild => {
+                                        if(id === _lastChild.id) {
+                                            this.goodsForm.goodsCategorySelectList = [item.id, child.id, _child.id, _lastChild.id];
+                                            return;
+                                        }
+                                    })
+                                }
                             })
                         }
                     })
@@ -239,7 +247,7 @@ export default {
         }, 
         // 获取商品类目
         getCategoryData() {
-            API.goodsCategoryGetTree().then((res)=> {
+            API.goodsCategoryGetTree(2).then((res)=> {
                 this.goodsCategoryList = res.data;
                 this.getCategoryCheck();
             });
@@ -280,9 +288,9 @@ export default {
                         } else {
                             Util.messageSuccess("创建成功");
                         }
+                        this.$router.push({name:'goodsList'});
                     }).finally((res) => {
                         if(this.loading)this.loading = false;
-                        this.$router.push({name:'goodsList'});
                     });
                 } else {
                     return false;

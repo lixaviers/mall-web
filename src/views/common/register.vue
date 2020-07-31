@@ -49,7 +49,7 @@ export default {
             btnLoading: false,
             countdown: 60,
             formItem: {
-                mobile: '17701744230',
+                mobile: '13112341234',
                 smsVerCode: '000000',
                 userPwd: '123456789',
                 confirmPwd: '123456789',

@@ -30,7 +30,7 @@
             getShopInfo() {
                 API.operationShopInfo().then((res)=> {
                     this.shopInfo = res.data;
-                    this.shopInfo.createTime = Util.dateFormatter(res.data.createTime);
+                    // this.shopInfo.createTime = Util.dateFormatter(res.data.createTime);
                     if(!res.data.shopIntroduction) {
                         this.shopInfo.shopIntroduction = '暂无';
                     }

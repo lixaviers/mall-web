@@ -30,7 +30,7 @@ export default {
         return {
             btnLoading: false,
             loginForm: {
-                mobile: '17701744230',
+                mobile: '13112341234',
                 userPwd: '123456789',
             },
             loginRule: {

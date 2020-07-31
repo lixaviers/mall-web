@@ -90,6 +90,28 @@ const menuRouters = [
                 ]
             },
             {
+                path: '/mmc', name: 'mmc', redirect: {name: 'couponList'}, component: (resolve) => require(['./views/index.vue'], resolve),
+                meta: {
+                    title: '营销', subTitle: '营销管理',
+                },
+                children: [
+                    {
+                        path: 'coupon/list', name: 'couponList', component: (resolve) => require(['./views/mmc/coupon/list.vue'], resolve),
+                        meta: {
+                            title: '优惠券管理', isMenu: true, parentName: 'mmc',
+                        }
+                    },
+                    {
+                        path: 'coupon/edit', name: 'couponEdit', component: (resolve) => require(['./views/mmc/coupon/edit.vue'], resolve),
+                        meta: {
+                            title: '创建优惠券', isMenu: false, parentName: 'mmc', 
+                            // 选中的子菜单名称
+                            activeName: 'couponList',
+                        }
+                    },
+                ]
+            },
+            {
                 path: 'shop', name: 'store',  redirect: {name: 'shopInfo'}, component: (resolve) => require(['./views/index.vue'], resolve),
                 meta: { 
                     title: '店铺', subTitle: '店铺管理', 

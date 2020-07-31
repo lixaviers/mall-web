@@ -2,7 +2,7 @@
     <div class="tinymce__container">
         <textarea :id="tinymceId" />
         <div class="tinymce__btn__container">
-            <el-upload action="/api-file/upload" :on-success="handleSuccess" :show-file-list="false">
+            <el-upload action="/api/file/upload" :on-success="handleSuccess" :show-file-list="false">
                 <el-button type="primary"><i class="el-icon-upload"></i>上传图片</el-button>
             </el-upload>
         </div>

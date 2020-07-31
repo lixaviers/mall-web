@@ -37,9 +37,9 @@
             getShopList() {
                 API.operationShopList().then((res)=> {
                     if(res.data) {
-                        res.data.forEach(item => {
-                            item.createTime = Util.dateFormatter(item.createTime);
-                        });
+                        // res.data.forEach(item => {
+                            // item.createTime = Util.dateFormatter(item.createTime);
+                        // });
                         this.shopList = res.data;
                     }
                 });

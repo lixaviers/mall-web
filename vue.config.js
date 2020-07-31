@@ -10,7 +10,7 @@ module.exports = {
         entry: 'src/main.js', // page 的入口,每个“page”应该有一个对应的 JavaScript 入口文件
         template: 'public/index.html', // 模板来源
         filename: 'index.html', // 在 dist/index.html 的输出
-        title: 'Index Page', // 当使用 title 选项时,在 template 中使用：<title><%= htmlWebpackPlugin.options.title %></title>
+        title: '素焉商城', // 当使用 title 选项时,在 template 中使用：<title><%= htmlWebpackPlugin.options.title %></title>
         chunks: ['chunk-vendors', 'chunk-common', 'index'] // 在这个页面中包含的块，默认情况下会包含,提取出来的通用 chunk 和 vendor chunk
       }
     },
@@ -24,40 +24,16 @@ module.exports = {
     },
     //反向代理
     devServer: {
-      port: 10000,
+      port: 10001,
       proxy: {
-          '/api-operation': {
-              target: 'http://localhost:10008', // 域名
+          '/api': {
+              target: 'http://localhost:10002', // 域名
               ws: false, // 是否启用websockets
               changOrigin: true, // 开启代理：在本地会创建一个虚拟服务端，然后发送请求的数据，并同时接收请求的数据，这样服务端和服务端进行数据的交互就不会有跨域问题
               pathRewrite: {
-                  '/api-operation': '',
+                  '/api': '',
               }
-          },
-          '/api-user': {
-              target: 'http://localhost:10004',
-              ws: false,
-              changOrigin: true,
-              pathRewrite: {
-                  '/api-user': '',
-              }
-          },
-          '/api-goods': {
-              target: 'http://localhost:10011',
-              ws: false,
-              changOrigin: true,
-              pathRewrite: {
-                  '/api-goods': '',
-              }
-          },
-          '/api-file': {
-              target: 'http://localhost:10003',
-              ws: false,
-              changOrigin: true,
-              pathRewrite: {
-                  '/api-file': '',
-              }
-          },
+          }
       }
     },
     pluginOptions: {

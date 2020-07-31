@@ -19,6 +19,9 @@ axios.interceptors.response.use(
                 Util.messageError(response.data.message || '系统异常');
                 // localStorage.removeItem('aegeanUserInfo')
                 top.location.href = '/#/login'
+            } else if (code === 605) {
+                top.location.href = '/#/shop/list'
+                Util.messageError(response.data.message || '请选择店铺');
             } else {
                 Util.messageError(response.data.message || '系统异常');
                 return Promise.reject(response.data)

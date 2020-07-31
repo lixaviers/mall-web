@@ -17,13 +17,25 @@
                 style="width: 100%"
             >
                 <el-table-column prop="goodsName" label="商品名称"></el-table-column>
-                <el-table-column prop="viewCount" label="浏览量" sortable width="100"></el-table-column>
                 <el-table-column prop="inventory" label="库存" sortable width="100"></el-table-column>
+                <el-table-column prop="viewCount" label="浏览量" sortable width="100"></el-table-column>
                 <el-table-column prop="sales" label="销量" sortable width="100"></el-table-column>
-                <el-table-column prop="createTime" label="创建时间" sortable width="150"></el-table-column>
-                <el-table-column label="操作" width="120">
+                <el-table-column prop="goodsStatus" label="状态" width="120">
                     <template slot-scope="scope">
-                        <el-button @click="handleEdit(scope.row)">编辑</el-button>
+                        <el-tag v-if="scope.row.goodsStatus == 1" type="success">已上架</el-tag>
+                        <el-tag v-else-if="scope.row.goodsStatus == 2" type="warning">已下架</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="createTime" label="创建时间" sortable width="150"></el-table-column>
+                <el-table-column label="操作" width="150">
+                    <template slot-scope="scope">
+                        <el-button @click="handleEdit(scope.row)" type="primary">编辑</el-button>
+                        <el-popconfirm v-if="scope.row.goodsStatus == 1" title="确定下架商品吗？" @onConfirm="handleShelves(scope.row.id, 2)" class="ml10">
+                            <el-button slot="reference">下架</el-button>
+                        </el-popconfirm>
+                        <el-popconfirm v-if="scope.row.goodsStatus == 2" title="确定上架商品吗？" @onConfirm="handleShelves(scope.row.id, 1)" class="ml10">
+                            <el-button slot="reference">上架</el-button>
+                        </el-popconfirm>
                     </template>
                 </el-table-column>
             </el-table>
@@ -65,6 +77,11 @@ export default {
         // 编辑商品
         handleEdit(row) {
             this.$router.push({name:'goodsEdit',query:{id: row.id}});
+        },
+        handleShelves(id, opt) {
+            API.goodsShelves(id, opt).then((res)=> {
+                this.getGoodsList();
+            });
         },
         // 变换每页条数
         handleSizeChange(val) {

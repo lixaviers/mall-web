@@ -1,7 +1,9 @@
 import Http from "./axios";
-const operation = "/api-operation";
-const user = "/api-user";
-const goods = "/api-goods";
+const operation = "/api/operation-b";
+const user = "/api/user-b";
+const goods = "/api/goods-b";
+const mmc = "/api/mmc-b";
+
 
 export default {
     // ---------运营平台相关---------
@@ -33,6 +35,9 @@ export default {
     operationShopUpdate(params) {
         return Http.post(`${operation}/b/shop/update`, params);
     },
+    operationSelectShop(id) {
+        return Http.get(`${operation}/b/shop/select/${id}`);
+    },
 
 
     // ---------用户中心相关---------
@@ -56,8 +61,8 @@ export default {
 
     // ---------商品中心相关---------
     // 获取商品类目树
-    goodsCategoryGetTree() {
-        return Http.get(`${goods}/b/goodsCategory/getTree`);
+    goodsCategoryGetTree(type) {
+        return Http.get(`${goods}/b/goodsCategory/getTree/${type}`);
     },
     // 创建商品
     goodsAdd(params) {
@@ -71,5 +76,26 @@ export default {
     goodsGet(id) {
         return Http.get(`${goods}/b/goods/get/${id}`);
     },
+    // 查询商品
+    goodsShelves(id, opt) {
+        return Http.post(`${goods}/b/goods/shelves/${id}/${opt}`);
+    },
+
+    // ---------营销中心相关---------
+    // 查询优惠券
+    couponQuery(params) {
+        return Http.post(`${mmc}/b/coupon/query`, params);
+    },
+    couponAdd(params) {
+        return Http.post(`${mmc}/b/coupon/addOrUpdate`, params);
+    },
+    getPromotionTypes(type) {
+        return Http.get(`${mmc}/b/promotion/getTypes/${type}`);
+    },
+    // 查询优惠券
+    couponGet(id) {
+        return Http.get(`${mmc}/b/coupon/get/${id}`);
+    },
+    
 
 }
