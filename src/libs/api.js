@@ -89,6 +89,9 @@ export default {
     couponAdd(params) {
         return Http.post(`${mmc}/b/coupon/addOrUpdate`, params);
     },
+    getCouponChannelTypes() {
+        return Http.get(`${mmc}/b/couponChannel/getTypes`);
+    },
     getPromotionTypes(type) {
         return Http.get(`${mmc}/b/promotion/getTypes/${type}`);
     },

@@ -86,6 +86,13 @@
                     </ul>
                     <div v-show="goodsCategoryErrorFlag" class="el-form-item__error">请选择商品类目</div>
                 </el-form-item>
+                <el-form-item label="渠道">
+                    <div class="mb10" v-for="(item, index) in channelList" :key="item.id">
+                        <el-checkbox v-model="channelList[index].checked">{{item.label}}</el-checkbox>
+                        <el-input-number v-show="channelList[index].checked" :min="1" :max="99999999" :precision="0" v-model="channelList[index].inventory" class="ml10" />
+                        <div v-show="channelErrorFlag" class="el-form-item__error">渠道数据错误</div>
+                    </div>
+                </el-form-item>
                 <el-form-item>
                     <el-button type="primary" :loading="loading" @click="onSubmit('couponForm')">{{buttonText}}</el-button>
                     <el-button @click="$router.push({name:'couponList'})">取消</el-button>
@@ -146,6 +153,10 @@ export default {
                     }
                 }]
             },
+            // 优惠券渠道
+            channelList: [],
+            // 渠道错误标识
+            channelErrorFlag: false,
             // 商品类目错误标识
             goodsCategoryErrorFlag: false,
             // 使用范围商品类目展示标识
@@ -191,7 +202,9 @@ export default {
                 orderLimit: 0,
                 price: 0,
                 couponScope: 1,
-                promotionScopeList: []
+                promotionScopeList: [],
+                // 优惠券渠道
+                channelList: [],
             },
             // 优惠券错误标志
             couponTypeErrorFlag: false,
@@ -201,27 +214,45 @@ export default {
         }
     },
     created() {
-        this.getCouponTypeList();
-        // 优惠券id，用来判断新增还是编辑
-        let id = this.$route.query.id;
-        if(id) {
-            this.buttonText = '立即保存';
-            // 获取商品详情
-            API.couponGet(id).then((res)=> {
-                this.couponForm = res.data;
-                this.promotionAmountScope = res.data.promotionAmountScopeList;
-                if(res.data.personLimit > 0) {
-                    this.isPersonLimit = true;
+        // 获取优惠券类型列表
+        API.getPromotionTypes(1).then((res)=> {
+            this.couponTypeOptions = res.data;
+            // 获取渠道列表
+            API.getCouponChannelTypes().then((res)=> {
+                this.channelList = res.data;
+                
+                // 优惠券id，用来判断新增还是编辑
+                let id = this.$route.query.id;
+                if(id) {
+                    this.buttonText = '立即保存';
+                    // 获取商品详情
+                    API.couponGet(id).then((res)=> {
+                        this.couponForm = res.data;
+                        this.promotionAmountScope = res.data.promotionAmountScopeList;
+                        if(res.data.personLimit > 0) {
+                            this.isPersonLimit = true;
+                        }
+                        if(res.data.orderLimit > 0) {
+                            this.isOrderLimit = true;
+                        }
+                        // 设置时间选择
+                        this.$set(this.couponForm, "effectTime", [new Date(res.data.startTime), new Date(res.data.endTime)]);
+                        this.goodsCategoryCheckedList = res.data.promotionScopeList;
+
+                        res.data.channelList.forEach(item => {
+                            this.channelList.forEach(channel => {
+                                if(channel.value == item.channelId) {
+                                    channel.checked = true;
+                                    channel.inventory = item.inventory;
+                                }
+                            });
+                        });
+
+                    });
                 }
-                if(res.data.orderLimit > 0) {
-                    this.isOrderLimit = true;
-                }
-                // 设置时间选择
-                this.$set(this.couponForm, "effectTime", [new Date(res.data.startTime), new Date(res.data.endTime)]);
-                this.goodsCategoryCheckedList = res.data.promotionScopeList;
             });
-        } else {
-        }
+        });
+        
 
     },
     methods: {
@@ -244,7 +275,6 @@ export default {
         // 删除已选择的类目
         goodsCategoryCheckedClose(obj) {
             this.goodsCategoryCheckedList.splice(this.goodsCategoryCheckedList.indexOf(obj), 1);
-            console.log(this.goodsCategoryCheckedList)
         },
         scopeClose(goodsCategoryCheckedList) {
             this.goodsCategoryVisible = false;
@@ -261,12 +291,6 @@ export default {
             this.$nextTick(() => {
                 this.couponForm.effectTime = [];
                 this.$set(this.couponForm, "effectTime", [e[0], e[1]]);
-            });
-        },
-        // 获取列表
-        getCouponTypeList() {
-            API.getPromotionTypes(1).then((res)=> {
-                this.couponTypeOptions = res.data;
             });
         },
         // 新增阶梯
@@ -321,6 +345,25 @@ export default {
                         }
                         this.couponForm.promotionScopeList = this.goodsCategoryCheckedList;
                     }
+
+                    // 验证渠道
+                    let channelList = [];
+                    this.channelList.forEach(item => {
+                        if(item.checked) {
+                            if(!item.inventory) {
+                                this.channelErrorFlag = true;
+                                return;
+                            }
+                            channelList.push({channelId: item.value, inventory: item.inventory, isIssueTime: false});
+                        }
+                    });
+                    if(!channelList || channelList.length == 0) {
+                            this.channelErrorFlag = true;
+                            return;
+                    }
+
+                    this.channelErrorFlag = false;
+                    this.couponForm.channelList = channelList;
                     this.goodsCategoryErrorFlag = false;
                     this.couponForm.startTime = Util.dateFormatter(this.couponForm.effectTime[0]);
                     this.couponForm.endTime = Util.dateFormatter(this.couponForm.effectTime[1]);
