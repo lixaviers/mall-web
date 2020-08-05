@@ -109,6 +109,20 @@ const menuRouters = [
                             activeName: 'couponList',
                         }
                     },
+                    {
+                        path: 'subPromotion/list', name: 'subPromotionList', component: (resolve) => require(['./views/mmc/subPromotion/list.vue'], resolve),
+                        meta: {
+                            title: '订单促销', isMenu: true, parentName: 'mmc',
+                        }
+                    },
+                    {
+                        path: 'subPromotion/edit', name: 'subPromotionEdit', component: (resolve) => require(['./views/mmc/subPromotion/edit.vue'], resolve),
+                        meta: {
+                            title: '创建订单促销', isMenu: false, parentName: 'mmc', 
+                            // 选中的子菜单名称
+                            activeName: 'subPromotionList',
+                        }
+                    },
                 ]
             },
             {

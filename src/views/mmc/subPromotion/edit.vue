@@ -1,37 +1,37 @@
 <template>
     <div class="gooods__edit">
         <el-card shadow="always">
-            <el-form :model="couponForm" ref="couponForm" label-width="120px" :rules="rules">
+            <el-form :model="subPromotionForm" ref="subPromotionForm" label-width="120px" :rules="rules">
                 <h3>基本信息</h3>
                 <el-divider></el-divider>
-                <el-form-item label="优惠券名称" prop="couponName">
-                    <el-input v-model="couponForm.couponName" placeholder="优惠券名称" style="width: 400px" maxlength="50" show-word-limit></el-input>
+                <el-form-item label="订单促销名称" prop="subPromotionName">
+                    <el-input v-model="subPromotionForm.subPromotionName" placeholder="订单促销名称" style="width: 400px" maxlength="50" show-word-limit></el-input>
                 </el-form-item>
-                <el-form-item label="优惠券类型">
-                    <el-select v-model="couponForm.couponType" placeholder="请选择">
+                <el-form-item label="订单促销类型">
+                    <el-select v-model="subPromotionForm.subPromotionType" placeholder="请选择">
                         <el-option
-                            v-for="item in couponTypeOptions"
+                            v-for="item in subPromotionTypeOptions"
                             :key="item.value"
                             :label="item.label"
                             :value="item.value">
                         </el-option>
                     </el-select>
-                    <div class="el-form-item__error" v-if="couponTypeErrorFlag">{{couponTypeErrorText}}</div>
+                    <div class="el-form-item__error" v-if="subPromotionTypeErrorFlag">{{subPromotionTypeErrorText}}</div>
                 </el-form-item>
                 <el-form-item>
-                    <span v-if="couponForm.couponType == 2 || couponForm.couponType == 3 || couponForm.couponType == 4">
-                        <span v-if="couponForm.couponType == 3">每</span>满&nbsp;<el-input-number style="width:150px" :min="0.01" :max="99999999" :precision="2" v-model="couponForm.orderFullAmount" />&nbsp;元
+                    <span v-if="subPromotionForm.subPromotionType == 21 || subPromotionForm.subPromotionType == 22 || subPromotionForm.subPromotionType == 23">
+                        <span v-if="subPromotionForm.subPromotionType == 22">每</span>满&nbsp;<el-input-number style="width:150px" :min="0.01" :max="99999999" :precision="2" v-model="subPromotionForm.orderFullAmount" />&nbsp;元
                     </span>
-                    <span v-if="couponForm.couponType == 1 || couponForm.couponType == 2 || couponForm.couponType == 3">
-                        优惠&nbsp;<el-input-number style="width:150px" :min="0.01" :max="99999999" :precision="2" v-model="couponForm.promotionAmount" />&nbsp;元
+                    <span v-if="subPromotionForm.subPromotionType == 21 || subPromotionForm.subPromotionType == 22">
+                        优惠&nbsp;<el-input-number style="width:150px" :min="0.01" :max="99999999" :precision="2" v-model="subPromotionForm.promotionAmount" />&nbsp;元
                     </span>
-                    <span v-if="couponForm.couponType == 4">
-                        优惠&nbsp;<el-input-number style="width:150px" :min="0.1" :max="9.9" :precision="1" v-model="couponForm.discountAmount" />&nbsp;折
+                    <span v-if="subPromotionForm.subPromotionType == 23">
+                        优惠&nbsp;<el-input-number style="width:150px" :min="0.1" :max="9.9" :precision="1" v-model="subPromotionForm.discountAmount" />&nbsp;折
                     </span>
-                    <span v-if="couponForm.couponType == 3 || couponForm.couponType == 4">
-                        封顶优惠&nbsp;<el-input-number style="width:150px" :max="99999999" :precision="2" v-model="couponForm.promotionMaxAmount" />&nbsp;元
+                    <span v-if="subPromotionForm.subPromotionType == 22 || subPromotionForm.subPromotionType == 23">
+                        封顶优惠&nbsp;<el-input-number style="width:150px" :max="99999999" :precision="2" v-model="subPromotionForm.promotionMaxAmount" />&nbsp;元
                     </span>
-                    <div v-if="couponForm.couponType == 5">
+                    <div v-if="subPromotionForm.subPromotionType == 24">
                         <div v-for="(item, index) in promotionAmountScope" :key="index" class="mb10">
                             满&nbsp;<el-input-number style="width:150px" :min="0.01" :max="99999999" :precision="2" v-model="item.orderFullAmount" />&nbsp;元
                             优惠&nbsp;<el-input-number style="width:150px" :min="0.01" :max="99999999" :precision="2" v-model="item.promotionAmount" />&nbsp;元
@@ -43,7 +43,7 @@
                 </el-form-item>
                 <el-form-item label="生效时间" prop="effectTime">
                     <el-date-picker
-                        v-model="couponForm.effectTime"
+                        v-model="subPromotionForm.effectTime"
                         @input="testClick" :picker-options="pickerOptions"
                         type="datetimerange"
                         range-separator="至"
@@ -52,43 +52,23 @@
                         :default-time="['00:00:00', '23:59:59']">
                     </el-date-picker>
                 </el-form-item>
-                <el-form-item label="库存">
-                    <el-input-number :min="1" :max="99999999" :precision="0" v-model="couponForm.inventory" style="width:200px;" />
-                </el-form-item>
-                <h3>限制条件</h3>
-                <el-divider></el-divider>
-                <el-form-item label="限购">
-                    <el-radio v-model="couponForm.useType" :label="1">免费</el-radio>
-                    <el-radio v-model="couponForm.useType" :label="2">付费</el-radio>
-                </el-form-item>
-                <el-form-item v-if="couponForm.useType == 2" label="价格">
-                    <el-input-number style="width:200px" :min="0.01" :max="99999999" :precision="2" v-model="couponForm.price" />&nbsp;元
-                </el-form-item>
-                <el-form-item label="限领">
-                    <el-checkbox v-model="isPersonLimit" size="large">限制每人可领张数</el-checkbox>
-                    <el-input-number v-if="isPersonLimit" style="width:100px;margin-left:10px;" :min="0" :max="99999999" :precision="0" v-model="couponForm.personLimit" />
-                </el-form-item>
-                <el-form-item label="限用">
-                    <el-checkbox v-model="isOrderLimit" size="large">限制每个订单可以使用张数</el-checkbox>
-                    <el-input-number v-if="isOrderLimit" style="width:100px;margin-left:10px;" :min="0" :max="99999999" :precision="0" v-model="couponForm.orderLimit" />
-                </el-form-item>
                 <h3>适用范围</h3>
                 <el-divider></el-divider>
                 <el-form-item label="使用范围">
-                    <el-radio-group v-model="couponForm.couponScope">
+                    <el-radio-group v-model="subPromotionForm.subPromotionScope">
                         <el-radio-button label="1">全店铺</el-radio-button>
                         <el-radio-button label="2">按商品类目</el-radio-button>
                     </el-radio-group>
                     <promotion-scope :data="goodsCategoryList" :defaultCheckeds="goodsCategoryCheckeds" @close="scopeClose" :visible="goodsCategoryVisible"></promotion-scope>
-                    <div v-show="couponForm.couponScope==2" class="mt10 mb10"><el-button @click="couponScopeChange">选择商品类目</el-button></div>
+                    <div v-show="subPromotionForm.subPromotionScope==2" class="mt10 mb10"><el-button @click="subPromotionScopeChange">选择商品类目</el-button></div>
                     <ul v-show="goodsCategoryCheckedList">
                         <el-tag @close="goodsCategoryCheckedClose(item)" v-for="item in goodsCategoryCheckedList" :key="item.goodsCategoryId" closable class="mr5">{{item.goodsCategoryName}}</el-tag>
                     </ul>
                     <div v-show="goodsCategoryErrorFlag" class="el-form-item__error">请选择商品类目</div>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" :loading="loading" @click="onSubmit('couponForm')">{{buttonText}}</el-button>
-                    <el-button @click="$router.push({name:'couponList'})">取消</el-button>
+                    <el-button type="primary" :loading="loading" @click="onSubmit('subPromotionForm')">{{buttonText}}</el-button>
+                    <el-button @click="$router.push({name:'subPromotionList'})">取消</el-button>
                 </el-form-item>
             </el-form>
         </el-card>
@@ -155,8 +135,8 @@ export default {
             goodsCategoryCheckeds:[],
             goodsCategoryCheckedList: [],
             rules: {
-                couponName: [
-                    { required: true, message: '请输入优惠券名称', trigger: 'blur' },
+                subPromotionName: [
+                    { required: true, message: '请输入订单促销名称', trigger: 'blur' },
                 ],
                 effectTime: [
                     { type: 'array', required: true, message: '请选择生效时间', trigger: 'change' }
@@ -166,58 +146,43 @@ export default {
                 ],
             },
             // 优惠券类型选项
-            couponTypeOptions: [],
-            // 是否限制每人可领张数
-            isPersonLimit: false,
-            // 是否限制订单可以使用张数
-            isOrderLimit: false,
+            subPromotionTypeOptions: [],
             // 阶梯满减
             promotionAmountScope: [
                 {orderFullAmount: '', promotionAmount: '',},
                 {orderFullAmount: '', promotionAmount: '',}
             ],
-            couponForm: {
+            subPromotionForm: {
                 id: '',
-                couponName: '',
-                couponType: 1,
+                subPromotionName: '',
+                subPromotionType: 21,
                 promotionAmount: '',
                 orderFullAmount: '',
                 discountAmount: '',
                 promotionMaxAmount: '',
                 effectTime: '',
-                useType: 1,
-                inventory: 1,
-                personLimit: 0,
-                orderLimit: 0,
-                price: 0,
-                couponScope: 1,
+                subPromotionScope: 1,
                 promotionScopeList: []
             },
             // 优惠券错误标志
-            couponTypeErrorFlag: false,
-            couponTypeErrorText: '',
+            subPromotionTypeErrorFlag: false,
+            subPromotionTypeErrorText: '',
             loading: false,
             buttonText: '立即创建',
         }
     },
     created() {
-        this.getCouponTypeList();
+        this.getSubPromotionTypeList();
         // 优惠券id，用来判断新增还是编辑
         let id = this.$route.query.id;
         if(id) {
             this.buttonText = '立即保存';
             // 获取商品详情
-            API.couponGet(id).then((res)=> {
-                this.couponForm = res.data;
+            API.subPromotionGet(id).then((res)=> {
+                this.subPromotionForm = res.data;
                 this.promotionAmountScope = res.data.promotionAmountScopeList;
-                if(res.data.personLimit > 0) {
-                    this.isPersonLimit = true;
-                }
-                if(res.data.orderLimit > 0) {
-                    this.isOrderLimit = true;
-                }
                 // 设置时间选择
-                this.$set(this.couponForm, "effectTime", [new Date(res.data.startTime), new Date(res.data.endTime)]);
+                this.$set(this.subPromotionForm, "effectTime", [new Date(res.data.startTime), new Date(res.data.endTime)]);
                 this.goodsCategoryCheckedList = res.data.promotionScopeList;
             });
         } else {
@@ -226,7 +191,7 @@ export default {
     },
     methods: {
         // 使用范围
-        couponScopeChange() {
+        subPromotionScopeChange() {
             if(!this.goodsCategoryList || this.goodsCategoryList.length == 0) {
                 this.getCategoryData();
             } else {
@@ -259,14 +224,14 @@ export default {
         },
         testClick(e) {
             this.$nextTick(() => {
-                this.couponForm.effectTime = [];
-                this.$set(this.couponForm, "effectTime", [e[0], e[1]]);
+                this.subPromotionForm.effectTime = [];
+                this.$set(this.subPromotionForm, "effectTime", [e[0], e[1]]);
             });
         },
         // 获取列表
-        getCouponTypeList() {
-            API.getPromotionTypes(1).then((res)=> {
-                this.couponTypeOptions = res.data;
+        getSubPromotionTypeList() {
+            API.getPromotionTypes(2).then((res)=> {
+                this.subPromotionTypeOptions = res.data;
             });
         },
         // 新增阶梯
@@ -281,22 +246,22 @@ export default {
         onSubmit(formName) {
             this.$refs[formName].validate((valid) => {
                 if (valid) {
-                    if(this.couponForm.couponType == 2 || this.couponForm.couponType == 3) {
-                        // 满减券
-                        if(this.couponForm.orderFullAmount <= this.couponForm.promotionAmount) {
-                            this.couponTypeErrorFlag = true;
-                            this.couponTypeErrorText = '订单金额必须大于优惠金额';
+                    if(this.subPromotionForm.subPromotionType == 21 || this.subPromotionForm.subPromotionType == 22) {
+                        // 满减
+                        if(this.subPromotionForm.orderFullAmount <= this.subPromotionForm.promotionAmount) {
+                            this.subPromotionTypeErrorFlag = true;
+                            this.subPromotionTypeErrorText = '订单金额必须大于优惠金额';
                             return;
                         } else {
-                            this.couponTypeErrorFlag = false;
+                            this.subPromotionTypeErrorFlag = false;
                         }
-                    } else if(this.couponForm.couponType == 5) {
-                        // 阶梯满减券
+                    } else if(this.subPromotionForm.subPromotionType == 24) {
+                        // 阶梯满减
                         let minOrderFullAmount, minPromotionAmount;
                         for(var i=0; i < this.promotionAmountScope.length; i++) {
                             if(this.promotionAmountScope[i].orderFullAmount <= this.promotionAmountScope[i].promotionAmount) {
-                                this.couponTypeErrorFlag = true;
-                                this.couponTypeErrorText = '阶梯有误';
+                                this.subPromotionTypeErrorFlag = true;
+                                this.subPromotionTypeErrorText = '阶梯有误';
                                 return;
                             }
                             if(i == 0) {
@@ -304,36 +269,38 @@ export default {
                                 minPromotionAmount = this.promotionAmountScope[i].promotionAmount;
                             } else {
                                 if(minOrderFullAmount >= this.promotionAmountScope[i].orderFullAmount || minPromotionAmount >= this.promotionAmountScope[i].promotionAmount) {
-                                    this.couponTypeErrorFlag = true;
-                                    this.couponTypeErrorText = '阶梯有误';
+                                    this.subPromotionTypeErrorFlag = true;
+                                    this.subPromotionTypeErrorText = '阶梯有误';
                                     return;
                                 }
                             }
                         }
-                        this.couponTypeErrorFlag = false;
-                        this.couponForm.promotionScopeList = this.promotionAmountScope;
+                        this.subPromotionTypeErrorFlag = false;
+                        this.subPromotionForm.promotionScopeList = this.promotionAmountScope;
+                    } else if(this.subPromotionForm.subPromotionType == 23) {
+                        this.subPromotionForm.promotionAmount = null;
                     }
-                    if(this.couponForm.couponScope == 2) {
+                    if(this.subPromotionForm.subPromotionScope == 2) {
                         // 使用范围 按商品类目
                         if(!this.goodsCategoryCheckedList || this.goodsCategoryCheckedList.length == 0) {
                             this.goodsCategoryErrorFlag = true;
                             return;
                         }
-                        this.couponForm.promotionScopeList = this.goodsCategoryCheckedList;
+                        this.subPromotionForm.promotionScopeList = this.goodsCategoryCheckedList;
                     }
                     this.goodsCategoryErrorFlag = false;
-                    this.couponForm.startTime = Util.dateFormatter(this.couponForm.effectTime[0]);
-                    this.couponForm.endTime = Util.dateFormatter(this.couponForm.effectTime[1]);
+                    this.subPromotionForm.startTime = Util.dateFormatter(this.subPromotionForm.effectTime[0]);
+                    this.subPromotionForm.endTime = Util.dateFormatter(this.subPromotionForm.effectTime[1]);
                     this.loading = true;
-                    console.log(this.couponForm);
-                    API.couponAdd(this.couponForm).then((res)=> {
+                    console.log(this.subPromotionForm);
+                    API.subPromotionAdd(this.subPromotionForm).then((res)=> {
                         console.log(res);
-                        if(this.couponForm.id) {
+                        if(this.subPromotionForm.id) {
                             Util.messageSuccess("保存成功");
                         } else {
                             Util.messageSuccess("创建成功");
                         }
-                        this.$router.push({name:'couponList'});
+                        this.$router.push({name:'subPromotionList'});
                     }).finally((res) => {
                         if(this.loading)this.loading = false;
                     });

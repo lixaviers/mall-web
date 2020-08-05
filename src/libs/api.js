@@ -96,6 +96,16 @@ export default {
     couponGet(id) {
         return Http.get(`${mmc}/b/coupon/get/${id}`);
     },
+    // 查询订单促销
+    subPromotionQuery(params) {
+        return Http.post(`${mmc}/b/subPromotion/query`, params);
+    },
+    subPromotionAdd(params) {
+        return Http.post(`${mmc}/b/subPromotion/addOrUpdate`, params);
+    },
+    subPromotionGet(id) {
+        return Http.get(`${mmc}/b/subPromotion/get/${id}`);
+    },
     
 
 }
