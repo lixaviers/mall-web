@@ -1,6 +1,5 @@
 <template>
     <div>
-        <tree :data="tempList"></tree>
         <el-card shadow="always">
             <el-row>
                 <el-button type="primary" @click="$router.push({name: 'couponEdit'});">创建优惠券</el-button>
@@ -56,26 +55,12 @@
 <script>
 import Util from '../../../libs/util';
 import API from '../../../libs/api.js';
-import Tree from '@/components/tree'
 export default {
-    components: {Tree},
     data () {
         return {
             // 优惠券类型选项
             couponTypeOptions: [],
             goodsList: [],
-            tempList:[
-                {label: '一级1', value: 1, children: [
-                        {label: '二级1', value: 1, children: [
-                            {label: '三级1', value: 1, children: []}
-                        ]}
-                    ]
-                },
-                {label: '一级2', value: 2, children: [
-                        {label: '二级1', value: 1, children: []}
-                    ]
-                }
-            ],
             query: {
                 pageNo: 1,
                 pageSize: 20,

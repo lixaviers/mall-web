@@ -32,13 +32,13 @@
                         封顶优惠&nbsp;<el-input-number style="width:150px" :max="99999999" :precision="2" v-model="couponForm.price" />&nbsp;元
                     </span>
                     <div v-if="couponForm.couponType == 5">
-                        <div v-for="(item, index) in promotionScope" :key="index" class="mb10">
+                        <div v-for="(item, index) in promotionAmountScope" :key="index" class="mb10">
                             满&nbsp;<el-input-number style="width:150px" :min="0.01" :max="99999999" :precision="2" v-model="item.orderFullAmount" />&nbsp;元
                             优惠&nbsp;<el-input-number style="width:150px" :min="0.01" :max="99999999" :precision="2" v-model="item.promotionAmount" />&nbsp;元
-                            <el-button class="ml20" v-if="promotionScope.length > 2" @click="delPromotionScope(index)" type="danger">删除阶梯</el-button>
+                            <el-button class="ml20" v-if="promotionAmountScope.length > 2" @click="delPromotionAmountScope(index)" type="danger">删除阶梯</el-button>
                             <span class="ml10" style="color: #F56C6C;">{{item.error}}</span>
                         </div>
-                        <el-button class="ml20" v-if="promotionScope.length < 5" @click="addPromotionScope()">新增阶梯</el-button>
+                        <el-button class="ml20" v-if="promotionAmountScope.length < 5" @click="addPromotionAmountScope()">新增阶梯</el-button>
                     </div>
                 </el-form-item>
                 <el-form-item label="生效时间" prop="effectTime">
@@ -74,6 +74,17 @@
                 </el-form-item>
                 <h3>适用范围</h3>
                 <el-divider></el-divider>
+                <el-form-item label="使用范围">
+                    <el-radio-group v-model="couponForm.couponScope" @change="couponScopeChange">
+                        <el-radio-button label="1">全店铺</el-radio-button>
+                        <el-radio-button label="2">按商品类目</el-radio-button>
+                    </el-radio-group>
+                    <scope :data="goodsCategoryList" @close="scopeClose" :visible="goodsCategoryVisible"></scope>
+                    <ul v-show="goodsCategoryCheckedList">
+                        <el-tag @close="goodsCategoryCheckedClose(item)" v-for="item in goodsCategoryCheckedList" :key="item.goodsCategoryId" closable class="mr5">{{item.goodsCategoryName}}</el-tag>
+                    </ul>
+                    <div v-show="goodsCategoryErrorFlag" class="el-form-item__error">请选择商品类目</div>
+                </el-form-item>
                 <el-form-item>
                     <el-button type="primary" :loading="loading" @click="onSubmit('couponForm')">{{buttonText}}</el-button>
                     <el-button @click="$router.push({name:'couponList'})">取消</el-button>
@@ -85,9 +96,18 @@
 <script>
 import Util from '../../../libs/util';
 import API from '../../../libs/api.js';
+import Scope from './scope.vue';
 export default {
+    components: {Scope},
     data () {
         return {
+            // 商品类目错误标识
+            goodsCategoryErrorFlag: false,
+            // 使用范围商品类目展示标识
+            goodsCategoryVisible: false,
+            goodsCategoryList:[],
+            // 选中的商品类目
+            goodsCategoryCheckedList: [],
             rules: {
                 couponName: [
                     { required: true, message: '请输入优惠券名称', trigger: 'blur' },
@@ -106,7 +126,7 @@ export default {
             // 是否限制订单可以使用张数
             isOrderLimit: false,
             // 阶梯满减
-            promotionScope: [
+            promotionAmountScope: [
                 {orderFullAmount: '', promotionAmount: '',},
                 {orderFullAmount: '', promotionAmount: '',}
             ],
@@ -124,6 +144,8 @@ export default {
                 personLimit: 0,
                 orderLimit: 0,
                 price: 0,
+                couponScope: 1,
+                promotionScopeList: []
             },
             // 优惠券错误标志
             couponTypeErrorFlag: false,
@@ -141,7 +163,7 @@ export default {
             // 获取商品详情
             API.couponGet(id).then((res)=> {
                 this.couponForm = res.data;
-                this.promotionScope = res.data.promotionScopeList;
+                this.promotionAmountScope = res.data.promotionAmountScopeList;
                 if(res.data.personLimit > 0) {
                     this.isPersonLimit = true;
                 }
@@ -156,6 +178,36 @@ export default {
 
     },
     methods: {
+        // 使用范围
+        couponScopeChange(val) {
+            if(val == 2) {
+                // 选中按商品类目
+                if(!this.goodsCategoryList || this.goodsCategoryList.length == 0) {
+                    this.getCategoryData();
+                } else {
+                    this.goodsCategoryVisible = true;
+                }
+            } else {
+                this.goodsCategoryVisible = false;
+                this.goodsCategoryCheckedList = [];
+            }
+        },
+        // 删除已选择的类目
+        goodsCategoryCheckedClose(obj) {
+            this.goodsCategoryCheckedList.splice(this.goodsCategoryCheckedList.indexOf(obj), 1);
+            console.log(this.goodsCategoryCheckedList)
+        },
+        scopeClose(goodsCategoryCheckedList) {
+            this.goodsCategoryVisible = false;
+            this.goodsCategoryCheckedList = goodsCategoryCheckedList;
+        },
+        // 获取商品类目
+        getCategoryData() {
+            API.goodsCategoryGetTree(2).then((res)=> {
+                this.goodsCategoryList = res.data;
+                this.goodsCategoryVisible = true;
+            });
+        },
         testClick(e) {
             this.$nextTick(() => {
                 this.couponForm.effectTime = [];
@@ -169,12 +221,12 @@ export default {
             });
         },
         // 新增阶梯
-        addPromotionScope() {
-            this.promotionScope.push({orderFullAmount: '', promotionAmount: '',});
+        addPromotionAmountScope() {
+            this.promotionAmountScope.push({orderFullAmount: '', promotionAmount: '',});
         },
         // 删除阶梯
-        delPromotionScope(index) {
-            this.promotionScope.splice(index, 1);
+        delPromotionAmountScope(index) {
+            this.promotionAmountScope.splice(index, 1);
         },
         // 提交
         onSubmit(formName) {
@@ -192,17 +244,17 @@ export default {
                     } else if(this.couponForm.couponType == 5) {
                         // 阶梯满减券
                         let minOrderFullAmount, minPromotionAmount;
-                        for(var i=0; i < this.promotionScope.length; i++) {
-                            if(this.promotionScope[i].orderFullAmount <= this.promotionScope[i].promotionAmount) {
+                        for(var i=0; i < this.promotionAmountScope.length; i++) {
+                            if(this.promotionAmountScope[i].orderFullAmount <= this.promotionAmountScope[i].promotionAmount) {
                                 this.couponTypeErrorFlag = true;
                                 this.couponTypeErrorText = '阶梯有误';
                                 return;
                             }
                             if(i == 0) {
-                                minOrderFullAmount = this.promotionScope[i].orderFullAmount;
-                                minPromotionAmount = this.promotionScope[i].promotionAmount;
+                                minOrderFullAmount = this.promotionAmountScope[i].orderFullAmount;
+                                minPromotionAmount = this.promotionAmountScope[i].promotionAmount;
                             } else {
-                                if(minOrderFullAmount >= this.promotionScope[i].orderFullAmount || minPromotionAmount >= this.promotionScope[i].promotionAmount) {
+                                if(minOrderFullAmount >= this.promotionAmountScope[i].orderFullAmount || minPromotionAmount >= this.promotionAmountScope[i].promotionAmount) {
                                     this.couponTypeErrorFlag = true;
                                     this.couponTypeErrorText = '阶梯有误';
                                     return;
@@ -210,8 +262,17 @@ export default {
                             }
                         }
                         this.couponTypeErrorFlag = false;
-                        this.couponForm.promotionScopeList = this.promotionScope;
+                        this.couponForm.promotionScopeList = this.promotionAmountScope;
                     }
+                    if(this.couponForm.couponScope == 2) {
+                        // 使用范围 按商品类目
+                        if(!this.goodsCategoryCheckedList || this.goodsCategoryCheckedList.length == 0) {
+                            this.goodsCategoryErrorFlag = true;
+                            return;
+                        }
+                        this.couponForm.promotionScopeList = this.goodsCategoryCheckedList;
+                    }
+                    this.goodsCategoryErrorFlag = false;
                     this.couponForm.startTime = Util.dateFormatter(this.couponForm.effectTime[0]);
                     this.couponForm.endTime = Util.dateFormatter(this.couponForm.effectTime[1]);
                     this.loading = true;
