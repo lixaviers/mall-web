@@ -52,9 +52,6 @@
                         :default-time="['00:00:00', '23:59:59']">
                     </el-date-picker>
                 </el-form-item>
-                <el-form-item label="库存">
-                    <el-input-number :min="1" :max="99999999" :precision="0" v-model="couponForm.inventory" style="width:200px;" />
-                </el-form-item>
                 <h3>限制条件</h3>
                 <el-divider></el-divider>
                 <el-form-item label="限购">
@@ -197,7 +194,6 @@ export default {
                 promotionMaxAmount: '',
                 effectTime: '',
                 useType: 1,
-                inventory: 1,
                 personLimit: 0,
                 orderLimit: 0,
                 price: 0,

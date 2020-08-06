@@ -123,6 +123,20 @@ const menuRouters = [
                             activeName: 'subPromotionList',
                         }
                     },
+                    {
+                        path: 'bargain/list', name: 'bargainList', component: (resolve) => require(['./views/mmc/bargain/list.vue'], resolve),
+                        meta: {
+                            title: '砍价活动', isMenu: true, parentName: 'mmc',
+                        }
+                    },
+                    {
+                        path: 'bargain/edit', name: 'bargainEdit', component: (resolve) => require(['./views/mmc/bargain/edit.vue'], resolve),
+                        meta: {
+                            title: '创建砍价活动', isMenu: false, parentName: 'mmc', 
+                            // 选中的子菜单名称
+                            activeName: 'bargainList',
+                        }
+                    },
                 ]
             },
             {

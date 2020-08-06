@@ -2,11 +2,11 @@
     <div>
         <el-card shadow="always">
             <el-row>
-                <el-button type="primary" @click="$router.push({name: 'couponEdit'});">创建优惠券</el-button>
+                <el-button type="primary" @click="$router.push({name: 'bargainEdit'});">创建砍价活动</el-button>
             </el-row>
             <el-form :inline="true" :model="query" class="mt20">
-                <el-form-item label="优惠券名称">
-                    <el-input v-model="query.couponNameLike" placeholder="优惠券名称"></el-input>
+                <el-form-item label="活动名称">
+                    <el-input v-model="query.couponNameLike" placeholder="活动名称"></el-input>
                 </el-form-item>
                 <el-form-item label="类型">
                     <el-select v-model="query.couponType" placeholder="全部">
@@ -28,7 +28,7 @@
                 style="width: 100%"
             >
                 <el-table-column prop="id" label="ID" width="100"></el-table-column>
-                <el-table-column prop="couponName" label="优惠券名称"></el-table-column>
+                <el-table-column prop="couponName" label="活动名称"></el-table-column>
                 <el-table-column prop="couponTypeDesc" label="类型" width="120"></el-table-column>
                 <el-table-column prop="startTime" label="生效时间" width="150"></el-table-column>
                 <el-table-column prop="endTime" label="失效时间" width="150"></el-table-column>
@@ -66,7 +66,7 @@ import API from '../../../libs/api.js';
 export default {
     data () {
         return {
-            // 优惠券类型选项
+            // 砍价活动类型选项
             couponTypeOptions: [],
             goodsList: [],
             query: {
@@ -86,7 +86,7 @@ export default {
     methods: {
         // 编辑
         handleEdit(row) {
-            this.$router.push({name:'couponEdit',query:{id: row.id}});
+            this.$router.push({name:'bargainEdit',query:{id: row.id}});
         },
         // 变换每页条数
         handleSizeChange(val) {
@@ -106,7 +106,7 @@ export default {
         },
         // 获取列表
         getCouponList() {
-            API.couponQuery(this.query).then((res)=> {
+            API.bargainActivityQuery(this.query).then((res)=> {
                 this.query.pageNo = res.data.pageNo;
                 this.query.pageSize = res.data.pageSize;
                 this.query.total = res.data.totalRecords;

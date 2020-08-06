@@ -72,6 +72,9 @@ export default {
     goodsQuery(params) {
         return Http.post(`${goods}/b/goods/query`, params);
     },
+    goodsSkuQuery(params) {
+        return Http.post(`${goods}/b/goodsSku/query`, params);
+    },
     // 查询商品
     goodsGet(id) {
         return Http.get(`${goods}/b/goods/get/${id}`);
@@ -108,6 +111,10 @@ export default {
     },
     subPromotionGet(id) {
         return Http.get(`${mmc}/b/subPromotion/get/${id}`);
+    },
+    // 查询砍价活动
+    bargainActivityQuery(params) {
+        return Http.post(`${mmc}/b/bargainActivity/query`, params);
     },
     
 
