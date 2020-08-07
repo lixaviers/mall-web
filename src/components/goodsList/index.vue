@@ -71,7 +71,6 @@ export default {
         }
     },
     created() {
-        this.getGoodsList();
     },
     methods: {
         // 变换每页条数

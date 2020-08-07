@@ -15,7 +15,7 @@
                     <el-checkbox v-model="goodsForm.isMoreSpec" size="large"></el-checkbox>
                     <span class="tip"> 启用商品规格后，商品的价格及库存以商品规格为准</span>
                 </el-form-item>
-                <div v-show="goodsForm.isMoreSpec" style="padding: 0 40px 0 60px;">
+                <div v-if="goodsForm.isMoreSpec" style="padding: 0 40px 0 60px;">
                     <template v-if="specifications.length != 0">
                         <div class="spec" v-for="(spec,index) in specifications" :key="index" v-show="goodsForm.isMoreSpec">
                             <div>
@@ -69,7 +69,7 @@
                 
                 <div v-show="!goodsForm.isMoreSpec">
                     <el-form-item label="价格（元）">
-                        <el-input-number style="width:200px" :min="0" :max="99999999.99" :precision="2" v-model="goodsForm.price" />
+                        <el-input-number style="width:200px" :min="0" :max="99999999.99" :precision="2" v-model="goodsForm.listPrice" />
                     </el-form-item>
                     <el-form-item label="库存">
                         <el-input-number style="width:200px" :min="0" :max="99999999" :precision="0" v-model="goodsForm.inventory" />
@@ -175,7 +175,7 @@ export default {
                 }
                 this.goodsForm.goodsName = res.data.goodsName;
                 this.goodsForm.goodsCategoryId = res.data.goodsCategoryId;
-                this.goodsForm.price = res.data.price;
+                this.goodsForm.listPrice = res.data.listPrice;
                 this.goodsForm.inventory = res.data.inventory;
                 this.goodsForm.originalPrice = res.data.originalPrice;
                 this.goodsForm.skuList = res.data.skuList;
@@ -190,12 +190,16 @@ export default {
                         arr.push({prices: {inventory: skuList[i].inventory, price: skuList[i].price}});
                         let specValue = skuList[i].specValue.split(",");
                         arr[i].specifications = specValue;
-                        arr[i].id = skuList[i].id
+                        arr[i].id = skuList[i].id;
                         for (var j = 0; j < specValue.length; j++) {
                             (arr[i]['spec' + j]) = specValue[j];
                         }
                     }
                     this.specPrices = arr;
+                } else {
+                    this.specifications = [];
+                    this.specifications.push({name: "", values: []});
+                    this.specPrices = [];
                 }
             });
         } else {
@@ -263,25 +267,25 @@ export default {
                     let category = this.goodsForm.goodsCategorySelectList;
                     this.goodsForm.goodsCategoryId = category[category.length - 1];
                     let arr = this.tableData;
-                    for (var i = 0; i < arr.length; i++) {
-                        let specValue = '';
-                        for (var j = 0; j < arr[i].specifications.length; j++) {
-                            specValue += arr[i].specifications[j];
-                            if(j != arr[i].specifications.length - 1) {
-                                specValue += ',';
-                            }
-                        }
-                        arr[i].specValue = specValue;
-                        arr[i].price = arr[i].prices.price;
-                        arr[i].inventory = arr[i].prices.inventory;
-                    }
                     if(this.goodsForm.isMoreSpec) {
+                        for (var i = 0; i < arr.length; i++) {
+                            let specValue = '';
+                            for (var j = 0; j < arr[i].specifications.length; j++) {
+                                specValue += arr[i].specifications[j];
+                                if(j != arr[i].specifications.length - 1) {
+                                    specValue += ',';
+                                }
+                            }
+                            arr[i].specValue = specValue;
+                            arr[i].price = arr[i].prices.price;
+                            arr[i].inventory = arr[i].prices.inventory;
+                        }
                         this.goodsForm.skuList = arr;
                         this.goodsForm.goodsSpecificationList = this.specifications;
                     } else {
-                        this.goodsForm.skuList = [{price: this.goodsForm.price, inventory: this.goodsForm.inventory}];
+                        this.goodsForm.skuList[0].price = this.goodsForm.listPrice;
+                        this.goodsForm.skuList[0].inventory= this.goodsForm.inventory;
                     }
-                    console.log(this.goodsForm);
                     API.goodsAdd(this.goodsForm).then((res)=> {
                         if(this.goodsForm.id) {
                             Util.messageSuccess("保存成功");
