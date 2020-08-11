@@ -5,9 +5,6 @@
                 <el-button type="primary" @click="$router.push({name: 'bargainEdit'});">创建砍价活动</el-button>
             </el-row>
             <el-form :inline="true" :model="query" class="mt20">
-                <el-form-item label="活动名称">
-                    <el-input v-model="query.couponNameLike" placeholder="活动名称"></el-input>
-                </el-form-item>
                 <el-form-item label="类型">
                     <el-select v-model="query.couponType" placeholder="全部">
                         <el-option value=''>全部</el-option>
@@ -80,14 +77,12 @@ export default {
                 pageNo: 1,
                 pageSize: 20,
                 total: 0,
-                couponNameLike: '',
                 couponType: '',
                 orderBy: 'id DESC',
             }
         }
     },
     created() {
-        this.getCouponTypeList();
         this.getBargainList();
     },
     methods: {
@@ -104,12 +99,6 @@ export default {
         handleCurrentChange(val) {
             this.query.pageNo = val;
             this.getBargainList();
-        },
-        // 获取列表
-        getCouponTypeList() {
-            API.getPromotionTypes(1).then((res)=> {
-                this.couponTypeOptions = res.data;
-            });
         },
         // 获取列表
         getBargainList() {
