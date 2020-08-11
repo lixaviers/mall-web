@@ -6,7 +6,17 @@
                     <el-input v-model="goodsForm.goodsName" placeholder="商品名" style="width: 400px" maxlength="50" show-word-limit></el-input>
                 </el-form-item>
                 <el-form-item label="商品类目" prop="goodsCategorySelectList">
-                    <el-cascader :props="props" v-model="goodsForm.goodsCategorySelectList" :options="goodsCategoryList" style="width: 400px" placeholder="请选择"></el-cascader>
+                    <el-cascader @change="categoryChange" :props="props" v-model="goodsForm.goodsCategorySelectList" :options="goodsCategoryList" style="width: 400px" placeholder="请选择"></el-cascader>
+                </el-form-item>
+                <el-form-item label="商品品牌" prop="brandId">
+                    <el-select v-model="goodsForm.brandId" placeholder="请选择">
+                        <el-option
+                        v-for="item in goodsBrandList"
+                        :key="item.id"
+                        :label="item.brandName"
+                        :value="item.id">
+                        </el-option>
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="划线价（元）">
                     <el-input v-model="goodsForm.originalPrice" style="width:200px"></el-input>
@@ -107,6 +117,9 @@ export default {
                 goodsName: [
                     { required: true, message: '请输入商品名称', trigger: 'blur' },
                 ],
+                brandId: [
+                    { required: true, message: '请选择品牌', trigger: 'blur' },
+                ],
                 goodsCategorySelectList: [
                     { type: 'array', required: true, message: '请选择商品类目', trigger: 'change' }
                 ],
@@ -120,6 +133,8 @@ export default {
                 children: 'childCategoryList'
             },
             goodsCategoryList: [],
+            // 商品品牌列表
+            goodsBrandList: [],
             isPerPersonLimit: false,
             goodsForm: {
                 id: '',
@@ -128,6 +143,7 @@ export default {
                 goodsName: '',
                 goodsCategorySelectList: null,
                 goodsCategoryId: '',
+                brandId: '',
                 price: '',
                 inventory: '',
                 originalPrice: '',
@@ -215,6 +231,17 @@ export default {
 
     },
     methods: {
+        // 切换类目
+        categoryChange(obj) {
+            this.goodsForm.goodsCategoryId = obj[obj.length -1];
+            this.getGoodsBrandList();
+        },
+        // 获取商品品牌列表
+        getGoodsBrandList() {
+            API.goodsBrandGet(this.goodsForm.goodsCategoryId).then((res)=> {
+                this.goodsBrandList = res.data;
+            });
+        },
         // 回显商品类目
         getCategoryCheck() {
             let id = this.goodsForm.goodsCategoryId;
@@ -283,8 +310,12 @@ export default {
                         this.goodsForm.skuList = arr;
                         this.goodsForm.goodsSpecificationList = this.specifications;
                     } else {
-                        this.goodsForm.skuList[0].price = this.goodsForm.listPrice;
-                        this.goodsForm.skuList[0].inventory= this.goodsForm.inventory;
+                        if(!this.goodsForm.skuList || this.goodsForm.skuList.length == 0) {
+                            this.goodsForm.skuList = [{price:this.goodsForm.listPrice, inventory: this.goodsForm.inventory}];
+                        } else {
+                            this.goodsForm.skuList[0].price = this.goodsForm.listPrice;
+                            this.goodsForm.skuList[0].inventory= this.goodsForm.inventory;
+                        }
                     }
                     API.goodsAdd(this.goodsForm).then((res)=> {
                         if(this.goodsForm.id) {

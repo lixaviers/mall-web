@@ -5,8 +5,8 @@
                 <el-step title="设置活动信息" icon="el-icon-edit"></el-step>
                 <el-step title="设置砍价商品" icon="el-icon-edit"></el-step>
             </el-steps>
-            <activity v-show="stepIndex == 0" @setActivity="setActivity"></activity>
-            <goods v-show="stepIndex == 1" :activity="activity"></goods>
+            <activity v-show="stepIndex == 0" @setActivity="setActivity" ref="activity"></activity>
+            <goods v-show="stepIndex == 1" :activity="activity" ref="bargainItem"></goods>
         </el-card>
     </div>
 </template>
@@ -19,7 +19,7 @@ export default {
     components: {Activity, Goods},
     data () {
         return {
-            stepIndex: 1,
+            stepIndex: 0,
             activity: {}
         }
     },
@@ -29,11 +29,14 @@ export default {
         if(id) {
             this.buttonText = '立即保存';
             // 获取商品详情
-            API.couponGet(id).then((res)=> {
-                this.bargainForm = res.data;
-                // 设置时间选择
-                // this.$set(this.bargainForm, "effectTime", [new Date(res.data.startTime), new Date(res.data.endTime)]);
-                this.goodsCategoryCheckedList = res.data.promotionScopeList;
+            API.bargainGet(id).then((res)=> {
+                // 将砍价信息传给子组件
+                res.data.bargainItemList.forEach(item => {
+                    item.bargainMin = item.promotionMin * 100;
+                    item.bargainMax = item.promotionMax * 100;
+                });
+                this.$refs.activity.getBargainInfo(res.data);
+                this.$refs.bargainItem.getBargainInfo(res.data);
             });
         }
     },

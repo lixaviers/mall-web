@@ -11,9 +11,9 @@
         </el-form>
         <el-table :data="goodsList" style="width: 100%">
             <el-table-column fixed="left" label="操作" width="80">
-            <template slot-scope="scope">
-                <el-button @click.native.prevent="selectGoods(scope.row)" type="primary">选择</el-button>
-            </template>
+                <template slot-scope="scope">
+                    <el-button @click.native.prevent="selectGoods(scope.row)" type="primary">选择</el-button>
+                </template>
             </el-table-column>
             <el-table-column prop="skuCode" label="商品编码" width="80"></el-table-column>
             <el-table-column prop="goodsId" label="商品id" width="80"></el-table-column>
@@ -67,6 +67,7 @@ export default {
                 goodsNameLike: '',
                 sales: '',
                 goodsStatus: 1,
+                orderBy: 'id DESC',
             }
         }
     },

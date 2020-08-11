@@ -1,12 +1,9 @@
 <template>
     <div class="gooods__edit">
-        <el-form :model="bargainForm" ref="bargainForm" label-width="120px" :rules="rules" class="mt20">
-            <el-form-item label="活动名称" prop="activityName">
-                <el-input v-model="bargainForm.activityName" placeholder="活动名称" style="width: 400px" maxlength="50" show-word-limit></el-input>
-            </el-form-item>
+        <el-form :model="activityForm" ref="activityForm" label-width="120px" :rules="rules" class="mt20">
             <el-form-item label="生效时间" prop="effectTime">
                 <el-date-picker
-                    v-model="bargainForm.effectTime"
+                    v-model="activityForm.effectTime"
                     @input="testClick" :picker-options="pickerOptions"
                     type="datetimerange"
                     range-separator="至"
@@ -16,7 +13,7 @@
                 </el-date-picker>
             </el-form-item>
             <el-form-item label="活动规则" prop="activityRule">
-                <el-input type="textarea" v-model="bargainForm.activityRule" 
+                <el-input type="textarea" v-model="activityForm.activityRule" 
                     style="width: 500px;"
                     maxlength="2000" show-word-limit
                     :autosize="{ minRows: 10, maxRows: 15 }"
@@ -24,8 +21,7 @@
                 </el-input>
             </el-form-item>
             <el-form-item>
-                <el-button type="primary" @click="next('bargainForm')">下一步</el-button>
-                <el-button type="primary" :loading="loading" @click="onSubmit('bargainForm')">{{buttonText}}</el-button>
+                <el-button type="primary" @click="next('activityForm')">下一步</el-button>
                 <el-button @click="$router.push({name:'bargainList'})">取消</el-button>
             </el-form-item>
         </el-form>
@@ -82,9 +78,6 @@ export default {
                 }]
             },
             rules: {
-                activityName: [
-                    { required: true, message: '请输入活动名称', trigger: 'blur' },
-                ],
                 effectTime: [
                     { type: 'array', required: true, message: '请选择生效时间', trigger: 'change' }
                 ],
@@ -92,69 +85,31 @@ export default {
                     {required: true, message: '请输入活动规则', trigger: 'blur' }
                 ],
             },
-            bargainForm: {
+            activityForm: {
                 id: '',
-                activityName: '',
                 effectTime: '',
                 activityRule: '',
             },
-            loading: false,
-            buttonText: '立即创建',
         }
     },
     created() {
-                
-        // 优惠券id，用来判断新增还是编辑
-        let id = this.$route.query.id;
-        if(id) {
-            this.buttonText = '立即保存';
-            // 获取商品详情
-            API.couponGet(id).then((res)=> {
-                this.bargainForm = res.data;
-                // 设置时间选择
-                this.$set(this.bargainForm, "effectTime", [new Date(res.data.startTime), new Date(res.data.endTime)]);
-                this.goodsCategoryCheckedList = res.data.promotionScopeList;
-            });
-        }
-        
-
     },
     methods: {
+        getBargainInfo(obj) {
+            this.activityForm = obj;
+            // 设置时间选择
+            this.$set(this.activityForm, "effectTime", [new Date(obj.startTime), new Date(obj.endTime)]);
+        },
         testClick(e) {
             this.$nextTick(() => {
-                this.bargainForm.effectTime = [];
-                this.$set(this.bargainForm, "effectTime", [e[0], e[1]]);
+                this.activityForm.effectTime = [];
+                this.$set(this.activityForm, "effectTime", [e[0], e[1]]);
             });
         },
         next(formName) {
             this.$refs[formName].validate((valid) => {
                 if (valid) {
-                    this.$emit('setActivity', this.bargainForm);
-                } else {
-                    return false;
-                }
-            });
-        },
-        // 提交
-        onSubmit(formName) {
-            this.$refs[formName].validate((valid) => {
-                if (valid) {
-                    
-                    this.bargainForm.startTime = Util.dateFormatter(this.bargainForm.effectTime[0]);
-                    this.bargainForm.endTime = Util.dateFormatter(this.bargainForm.effectTime[1]);
-                    this.loading = true;
-                    console.log(this.bargainForm);
-                    API.couponAdd(this.bargainForm).then((res)=> {
-                        console.log(res);
-                        if(this.bargainForm.id) {
-                            Util.messageSuccess("保存成功");
-                        } else {
-                            Util.messageSuccess("创建成功");
-                        }
-                        this.$router.push({name:'bargainList'});
-                    }).finally((res) => {
-                        if(this.loading)this.loading = false;
-                    });
+                    this.$emit('setActivity', this.activityForm);
                 } else {
                     return false;
                 }

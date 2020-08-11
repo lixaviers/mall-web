@@ -20,7 +20,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="getCouponList">查询</el-button>
+                    <el-button type="primary" @click="getBargainList">查询</el-button>
                 </el-form-item>
             </el-form>
             <el-table
@@ -28,21 +28,28 @@
                 style="width: 100%"
             >
                 <el-table-column prop="id" label="ID" width="100"></el-table-column>
-                <el-table-column prop="couponName" label="活动名称"></el-table-column>
-                <el-table-column prop="couponTypeDesc" label="类型" width="120"></el-table-column>
-                <el-table-column prop="startTime" label="生效时间" width="150"></el-table-column>
-                <el-table-column prop="endTime" label="失效时间" width="150"></el-table-column>
-                <el-table-column prop="inventory" label="库存" sortable width="120"></el-table-column>
-                <el-table-column label="状态" width="120">
+                <el-table-column prop="goodsSkuCode" label="商品编码" width="150"></el-table-column>
+                <el-table-column prop="price" label="价格"></el-table-column>
+                <el-table-column prop="startTime" label="生效时间"></el-table-column>
+                <el-table-column prop="endTime" label="失效时间"></el-table-column>
+                <el-table-column label="有效期">
                     <template slot-scope="scope">
-                        <el-tag v-if="scope.row.couponStatus==1" type="info">已保存</el-tag>
+                        <span v-if="scope.row.validityDateType==1" >24小时</span>
+                        <span v-else-if="scope.row.validityDateType==2">48小时</span>
+                        <span v-else-if="scope.row.validityDateType==3">72小时</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="inventory" label="库存" sortable width="100"></el-table-column>
+                <el-table-column label="状态">
+                    <template slot-scope="scope">
+                        <el-tag v-if="scope.row.activityStatus==1" type="info">已保存</el-tag>
                         <el-tag v-else>1111</el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column prop="createTime" label="创建时间" sortable width="150"></el-table-column>
-                <el-table-column label="操作" width="150">
+                <el-table-column prop="createTime" label="创建时间" sortable></el-table-column>  
+                <el-table-column fixed="right" label="操作" width="150">
                     <template slot-scope="scope">
-                        <el-button @click="handleEdit(scope.row)">编辑</el-button>
+                        <el-button @click.native.prevent="handleEdit(scope.row)">编辑</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -81,7 +88,7 @@ export default {
     },
     created() {
         this.getCouponTypeList();
-        this.getCouponList();
+        this.getBargainList();
     },
     methods: {
         // 编辑
@@ -91,12 +98,12 @@ export default {
         // 变换每页条数
         handleSizeChange(val) {
             this.query.pageSize = val;
-            this.getCouponList();
+            this.getBargainList();
         },
         // 变换页数
         handleCurrentChange(val) {
             this.query.pageNo = val;
-            this.getCouponList();
+            this.getBargainList();
         },
         // 获取列表
         getCouponTypeList() {
@@ -105,8 +112,8 @@ export default {
             });
         },
         // 获取列表
-        getCouponList() {
-            API.bargainActivityQuery(this.query).then((res)=> {
+        getBargainList() {
+            API.bargainQuery(this.query).then((res)=> {
                 this.query.pageNo = res.data.pageNo;
                 this.query.pageSize = res.data.pageSize;
                 this.query.total = res.data.totalRecords;

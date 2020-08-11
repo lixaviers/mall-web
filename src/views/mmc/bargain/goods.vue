@@ -24,12 +24,12 @@
                 <el-input-number :min="1" :max="99999999" :precision="0" v-model="bargainForm.inventory" />
             </el-form-item>
             <el-form-item label="砍价阶梯">
-                <el-card v-for="(item, index) in bargainForm.itemList" :key="index" class="mb10" style="background: #F8F9FC;position:relative;">
+                <el-card v-for="(item, index) in bargainForm.bargainItemList" :key="index" class="mb10" style="background: #F8F9FC;position:relative;">
                     <el-row style="position: absolute;top: -5px;left: 0;">
                         <el-tag>阶段{{index+1}}</el-tag>
-                        <span class="error ml10">{{bargainForm.itemList[index].errorText}}</span>
+                        <span class="error ml10">{{bargainForm.bargainItemList[index].errorText}}</span>
                     </el-row>
-                    <el-button style="position: absolute;top: 0;right: 0;" @click="delItem(index)" v-show="bargainForm.itemList.length > 2" type="warning" class="ml20">删除</el-button>
+                    <el-button style="position: absolute;top: 0;right: 0;" @click="delItem(index)" v-show="bargainForm.bargainItemList.length > 2" type="warning" class="ml20">删除</el-button>
                     <el-row class="mt20">
                         <span>帮砍人数：</span>
                         <el-input v-model="item.numberMin" :maxlength="4" style="width: 120px;">
@@ -40,16 +40,16 @@
                             <template slot="append">人</template>
                         </el-input>
                         <span class="ml20">总砍价比例：</span>
-                        <el-input v-model="item.promotionMin" :maxlength="2" style="width: 120px;">
+                        <el-input v-model="item.bargainMin" :maxlength="2" style="width: 120px;">
                             <template slot="append">%</template>
                         </el-input>
                         <span class="ml5 mr5">至</span>
-                        <el-input v-model="item.promotionMax" :maxlength="2" style="width: 120px;">
+                        <el-input v-model="item.bargainMax" :maxlength="2" style="width: 120px;">
                             <template slot="append">%</template>
                         </el-input>
                     </el-row>
                 </el-card>
-                <el-button @click="addItem" v-show="bargainForm.itemList.length < 5" type="primary">新增阶梯</el-button>
+                <el-button @click="addItem" v-show="bargainForm.bargainItemList.length < 5" type="primary">新增阶梯</el-button>
                 <span class="error ml10">{{bargainError}}</span>
             </el-form-item>
             <el-form-item label="业务逻辑">
@@ -84,9 +84,6 @@ export default {
             goodsFlag: false,
             goods: null,
             rules: {
-                activityName: [
-                    { required: true, message: '请输入活动名称', trigger: 'blur' },
-                ],
                 inventory: [
                     { required: true, message: '请输入库存', trigger: 'blur' }
                 ],
@@ -99,9 +96,9 @@ export default {
                 validityDateType: 1,
                 inventory: '',
                 goodsSkuCode: '',
-                itemList: [
-                    {numberMin: '1', numberMax: '1', promotionMin: '35', promotionMax: '40'},
-                    {numberMin: '1', numberMax: '1', promotionMin: '30', promotionMax: '35'},
+                bargainItemList: [
+                    {numberMin: '', numberMax: '', bargainMin: '', bargainMax: ''},
+                    {numberMin: '', numberMax: '', bargainMin: '', bargainMax: ''},
                 ]
             },
             loading: false,
@@ -109,36 +106,29 @@ export default {
         }
     },
     created() {
-        // id，用来判断新增还是编辑
-        let id = this.$route.query.id;
-        if(id) {
-            this.buttonText = '立即保存';
-            // 获取商品详情
-            API.couponGet(id).then((res)=> {
-                this.bargainForm = res.data;
-                // 设置时间选择
-                this.$set(this.bargainForm, "effectTime", [new Date(res.data.startTime), new Date(res.data.endTime)]);
-                this.goodsCategoryCheckedList = res.data.promotionScopeList;
-            });
-        }
-        
-
     },
     methods: {
+        getBargainInfo(obj) {
+            this.bargainForm = obj;
+            this.buttonText = '立即保存';
+            // 查询商品信息
+            API.goodsSkuGet(obj.goodsSkuCode).then((res)=> {
+                this.goods = res.data;
+            });
+        },
         // 选择商品
         selectGoods(goods) {
             this.goodsFlag = false;
             this.goods = goods;
             this.bargainForm.goodsSkuCode = goods.skuCode;
-            console.log(this.bargainForm.goodsSkuCode);
         },
         // 删除阶梯
         delItem(index) {
-            this.bargainForm.itemList.splice(index, 1);
+            this.bargainForm.bargainItemList.splice(index, 1);
         },
         // 新增阶梯
         addItem() {
-            this.bargainForm.itemList.push({numberMin: '', numberMax: '', promotionMin: '', promotionMax: ''});
+            this.bargainForm.bargainItemList.push({numberMin: '', numberMax: '', bargainMin: '', bargainMax: ''});
         },
         // 提交
         onSubmit(formName) {
@@ -148,50 +138,52 @@ export default {
 
                     // 验证砍价阶梯
                     let sumPromotionMin = 0, sumPromotionMax = 0;
-                    for(var i=0; i<this.bargainForm.itemList.length; i++) {
-                        let item = this.bargainForm.itemList[i];
+                    for(var i=0; i < this.bargainForm.bargainItemList.length; i++) {
+                        let item = this.bargainForm.bargainItemList[i];
                         if(!item.numberMin || item.numberMin == '' || !item.numberMax || item.numberMax == '') {
                             item.errorText = "帮砍人数不能为空";
-                            this.$set(this.bargainForm.itemList, i, item);
+                            this.$set(this.bargainForm.bargainItemList, i, item);
                             return;
                         } else if(!Number.isInteger(Number(item.numberMin)) || !Number.isInteger(Number(item.numberMax))) {
                             item.errorText = "帮砍人数只能为数字";
-                            this.$set(this.bargainForm.itemList, i, item);
+                            this.$set(this.bargainForm.bargainItemList, i, item);
                             return;
                         } else if(Number(item.numberMin) < 1 || Number(item.numberMax) < 1) {
                             item.errorText = "帮砍人数必须大于0";
-                            this.$set(this.bargainForm.itemList, i, item);
+                            this.$set(this.bargainForm.bargainItemList, i, item);
                             return;
                         } else if(Number(item.numberMin) > Number(item.numberMax)) {
                             item.errorText = "帮砍人数范围错误";
-                            this.$set(this.bargainForm.itemList, i, item);
+                            this.$set(this.bargainForm.bargainItemList, i, item);
                             return;
-                        } else if(!item.promotionMin || item.promotionMin == '' || !item.promotionMax || item.promotionMax == '') {
+                        } else if(!item.bargainMin || item.bargainMin == '' || !item.bargainMax || item.bargainMax == '') {
                             item.errorText = "砍价比例不能为空";
-                            this.$set(this.bargainForm.itemList, i, item);
+                            this.$set(this.bargainForm.bargainItemList, i, item);
                             return;
-                        } else if(!Number.isInteger(Number(item.promotionMin)) || !Number.isInteger(Number(item.promotionMax))) {
+                        } else if(!Number.isInteger(Number(item.bargainMin)) || !Number.isInteger(Number(item.bargainMax))) {
                             item.errorText = "砍价比例只能为数字";
-                            this.$set(this.bargainForm.itemList, i, item);
+                            this.$set(this.bargainForm.bargainItemList, i, item);
                             return;
-                        } else if(Number(item.promotionMin) < 1 || Number(item.promotionMax) < 1) {
+                        } else if(Number(item.bargainMin) < 1 || Number(item.bargainMax) < 1) {
                             item.errorText = "砍价比例必须大于0";
-                            this.$set(this.bargainForm.itemList, i, item);
+                            this.$set(this.bargainForm.bargainItemList, i, item);
                             return;
-                        }  else if(Number(item.promotionMin) > 85 || Number(item.promotionMax) > 85) {
+                        }  else if(Number(item.bargainMin) > 85 || Number(item.bargainMax) > 85) {
                             item.errorText = "砍价比例不能大于85";
-                            this.$set(this.bargainForm.itemList, i, item);
+                            this.$set(this.bargainForm.bargainItemList, i, item);
                             return;
-                        }  else if(Number(item.promotionMin) > Number(item.promotionMax)) {
+                        }  else if(Number(item.bargainMin) > Number(item.bargainMax)) {
                             item.errorText = "砍价比例范围错误";
-                            this.$set(this.bargainForm.itemList, i, item);
+                            this.$set(this.bargainForm.bargainItemList, i, item);
                             return;
                         } else {
                             item.errorText = "";
-                            this.$set(this.bargainForm.itemList, i, item);
+                            this.$set(this.bargainForm.bargainItemList, i, item);
                         }
-                        sumPromotionMin += Number(item.promotionMin);
-                        sumPromotionMax += Number(item.promotionMax);
+                        sumPromotionMin += Number(item.bargainMin);
+                        sumPromotionMax += Number(item.bargainMax);
+                        item.promotionMin = Number(item.bargainMin) / 1000 * 10;
+                        item.promotionMax = Number(item.bargainMax) / 1000 * 10;
                     }
                     if(sumPromotionMin > sumPromotionMax) {
                         this.bargainError = '砍价总最小比例不能大于砍价总最大比例';
@@ -202,14 +194,15 @@ export default {
                     } else {
                         this.bargainError = '';
                     }
-
                     
-                    // this.bargainForm.startTime = Util.dateFormatter(this.bargainForm.effectTime[0]);
-                    // this.bargainForm.endTime = Util.dateFormatter(this.bargainForm.effectTime[1]);
-                    // this.loading = true;
-                    console.log(this.bargainForm);
-                    return;
-                    API.couponAdd(this.bargainForm).then((res)=> {
+                    this.bargainForm.startTime = Util.dateFormatter(this.activity.effectTime[0]);
+                    this.bargainForm.endTime = Util.dateFormatter(this.activity.effectTime[1]);
+                    this.bargainForm.id = this.activity.id;
+                    this.bargainForm.activityRule = this.activity.activityRule;
+                    this.bargainForm.price = this.goods.price;
+                    this.loading = true;
+                    console.log('this.bargainForm', this.bargainForm);
+                    API.bargainEdit(this.bargainForm).then((res)=> {
                         console.log(res);
                         if(this.bargainForm.id) {
                             Util.messageSuccess("保存成功");

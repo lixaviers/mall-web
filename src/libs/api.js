@@ -79,9 +79,16 @@ export default {
     goodsGet(id) {
         return Http.get(`${goods}/b/goods/get/${id}`);
     },
+    goodsSkuGet(skuCode) {
+        return Http.get(`${goods}/b/goodsSku/get?skuCode=${skuCode}`);
+    },
     // 查询商品
     goodsShelves(id, opt) {
         return Http.post(`${goods}/b/goods/shelves/${id}/${opt}`);
+    },
+    // 查询商品品牌
+    goodsBrandGet(categoryId) {
+        return Http.get(`${goods}/b/goodsBrand/get/${categoryId}`);
     },
 
     // ---------营销中心相关---------
@@ -112,9 +119,17 @@ export default {
     subPromotionGet(id) {
         return Http.get(`${mmc}/b/subPromotion/get/${id}`);
     },
-    // 查询砍价活动
-    bargainActivityQuery(params) {
-        return Http.post(`${mmc}/b/bargainActivity/query`, params);
+    // 查询砍价
+    bargainQuery(params) {
+        return Http.post(`${mmc}/b/bargain/query`, params);
+    },
+    // 新增/编辑砍价
+    bargainEdit(params) {
+        return Http.post(`${mmc}/b/bargain/addOrUpdate`, params);
+    },
+    // 查询砍价
+    bargainGet(id) {
+        return Http.get(`${mmc}/b/bargain/get/${id}`);
     },
     
 
