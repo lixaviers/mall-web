@@ -80,6 +80,7 @@
                 <div v-show="!goodsForm.isMoreSpec">
                     <el-form-item label="价格（元）">
                         <el-input-number style="width:200px" :min="0" :max="99999999.99" :precision="2" v-model="goodsForm.listPrice" />
+                        <div v-show="priceErrorFlag" class="el-form-item__error">请输入价格</div>
                     </el-form-item>
                     <el-form-item label="库存">
                         <el-input-number style="width:200px" :min="0" :max="99999999" :precision="0" v-model="goodsForm.inventory" />
@@ -90,6 +91,9 @@
                 </el-form-item>
                 <el-form-item v-if="isPerPersonLimit" label="限购">
                     <el-input-number style="width:200px" :min="0" :max="99999999" :precision="0" v-model="goodsForm.perPersonLimit" />&nbsp;个
+                </el-form-item>
+                <el-form-item label="起订量" prop="minimumQuantity">
+                    <el-input-number style="width:200px" :min="1" :max="99999999" :precision="0" v-model="goodsForm.minimumQuantity" />&nbsp;元
                 </el-form-item>
                 <el-form-item label="快递运费">
                     <el-input-number style="width:200px" :min="0" :max="99999999" :precision="2" v-model="goodsForm.expressFreight" />&nbsp;元
@@ -133,6 +137,9 @@ export default {
                 goodsCategorySelectList: [
                     { type: 'array', required: true, message: '请选择商品类目', trigger: 'change' }
                 ],
+                minimumQuantity: [
+                    { required: true, message: '请输入起订量', trigger: 'blur' },
+                ],
                 description: [
                     {required: true, message: '请输入商品详情', trigger: 'blur' }
                 ],
@@ -142,6 +149,8 @@ export default {
                 value: 'id',
                 children: 'childCategoryList'
             },
+            // 价格错误标识
+            priceErrorFlag: false,
             goodsCategoryList: [],
             // 商品品牌列表
             goodsBrandList: [],
@@ -150,6 +159,7 @@ export default {
                 id: '',
                 description: '',
                 perPersonLimit: 0,
+                minimumQuantity: 1,
                 goodsName: '',
                 goodsCategorySelectList: null,
                 goodsCategoryId: '',
@@ -215,6 +225,7 @@ export default {
                 this.getGoodsBrandList();
                 this.goodsForm.listPrice = res.data.listPrice;
                 this.goodsForm.inventory = res.data.inventory;
+                this.goodsForm.minimumQuantity = res.data.minimumQuantity;
                 this.goodsForm.originalPrice = res.data.originalPrice;
                 this.goodsForm.skuList = res.data.skuList;
                 this.goodsForm.isMoreSpec = res.data.isMoreSpec;
@@ -329,7 +340,12 @@ export default {
         onSubmit(formName) {
             this.$refs[formName].validate((valid) => {
                 if (valid) {
+                    if(!this.goodsForm.isMoreSpec && !this.goodsForm.listPrice) {
+                        this.priceErrorFlag = true;
+                        return;
+                    }
                     this.loading = true;
+                    this.priceErrorFlag = false;
                     if(!this.isPerPersonLimit) {
                         this.goodsForm.perPersonLimit = 0;
                     }
