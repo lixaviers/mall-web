@@ -66,7 +66,8 @@ export default {
                 total: 0,
                 goodsNameLike: '',
                 sales: '',
-                goodsStatus: 1,
+                // 已上架状态
+                commonStatus: 1,
                 orderBy: 'id DESC',
             }
         }

@@ -78,9 +78,8 @@ export default {
         this.destroyTinymce()
     },
     methods: {
-        handleSuccess(response) {
-            console.log(response.data);
-            window.tinymce.get(this.tinymceId).insertContent(`<img src="${response.data}" >`);
+        handleSuccess(response, file, fileList) {
+            window.tinymce.get(this.tinymceId).insertContent(`<img key="${file.uid}" src="${response.data}" >`);
         },
         initTinymce() {
             const _this = this

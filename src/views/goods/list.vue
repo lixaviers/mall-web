@@ -27,7 +27,7 @@
                     </template>
                 </el-table-column>
                 <el-table-column prop="createTime" label="创建时间" sortable width="150"></el-table-column>
-                <el-table-column label="操作" width="150">
+                <el-table-column fixed="right" label="操作" width="150">
                     <template slot-scope="scope">
                         <el-button @click="handleEdit(scope.row)" type="primary">编辑</el-button>
                         <el-popconfirm v-if="scope.row.goodsStatus == 1" title="确定下架商品吗？" @onConfirm="handleShelves(scope.row.id, 2)" class="ml10">
@@ -100,11 +100,11 @@ export default {
                 this.query.pageNo = res.data.pageNo;
                 this.query.pageSize = res.data.pageSize;
                 this.query.total = res.data.totalRecords;
-                if(res.data.totalRecords > 0) {
-                    res.data.records.forEach(item => {
-                        item.createTime = Util.dateFormatter(item.createTime);
-                    });
-                }
+                //if(res.data.totalRecords > 0) {
+                    //res.data.records.forEach(item => {
+                        //item.createTime = Util.dateFormatter(item.createTime);
+                    //});
+                //}
                 this.goodsList = res.data.records;
             });
         },

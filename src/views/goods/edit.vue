@@ -94,6 +94,16 @@
                 <el-form-item label="快递运费">
                     <el-input-number style="width:200px" :min="0" :max="99999999" :precision="2" v-model="goodsForm.expressFreight" />&nbsp;元
                 </el-form-item>
+                <el-form-item label="商品图片">
+                    <!--<multi-upload v-model="pictureUrls"></multi-upload> -->
+                    <el-upload
+                        action="/api/file/upload" list-type="picture-card"
+                        :on-success="fileSuccess" :on-remove="fileRemove"
+                        :file-list="fileList">
+                        <el-button size="small" type="primary">点击上传</el-button>
+                        <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+                    </el-upload>
+                </el-form-item>
                 <el-form-item label="商品详情" prop="description">
                     <tinymce :width="995" :height="300" v-model="goodsForm.description"></tinymce>
                 </el-form-item>
@@ -108,7 +118,7 @@
 <script>
 import Util from '../../libs/util';
 import API from '../../libs/api.js';
-import Tinymce from '@/components/tinymce'
+import Tinymce from '@/components/tinymce';
 export default {
     components: {Tinymce},
     data () {
@@ -156,7 +166,8 @@ export default {
             arr: [],
             specifications: [],
             specPrices: [],
-            newSpecName: ['', '']
+            newSpecName: ['', ''],
+            fileList: []
         }
     },
     computed: {
@@ -172,7 +183,7 @@ export default {
                 }
             }
             return arr
-        }
+        },
     },
     created() {
         // 商品id，用来判断新增还是编辑
@@ -184,6 +195,15 @@ export default {
                 // this.goodsForm = res.data;
                 // 这里不能直接赋值对象，否则会触发[商品类目]的校验
                 this.goodsForm.id = res.data.id;
+                this.goodsForm.brandId = res.data.brandId;
+                this.goodsForm.pictureUrls = res.data.pictureUrls;
+                // 回显商品图片
+                if(this.goodsForm.pictureUrls) {
+                    let pics = this.goodsForm.pictureUrls.split(',');
+                    for(let i=0;i<pics.length;i++) {
+                        this.fileList.push({url: pics[i]});
+                    }
+                }
                 this.goodsForm.description = res.data.description;
                 this.goodsForm.perPersonLimit = res.data.perPersonLimit;
                 if(this.goodsForm.perPersonLimit > 0) {
@@ -191,6 +211,8 @@ export default {
                 }
                 this.goodsForm.goodsName = res.data.goodsName;
                 this.goodsForm.goodsCategoryId = res.data.goodsCategoryId;
+                // 获取商品类目
+                this.getGoodsBrandList();
                 this.goodsForm.listPrice = res.data.listPrice;
                 this.goodsForm.inventory = res.data.inventory;
                 this.goodsForm.originalPrice = res.data.originalPrice;
@@ -231,6 +253,26 @@ export default {
 
     },
     methods: {
+        // 图片移除
+        fileRemove(file, fileList) {
+            let pictureUrls = '';
+            for(var i=0; i<fileList.length; i++) {
+                pictureUrls += fileList[i].url;
+                if(i != fileList.length -1) {
+                    pictureUrls += ',';
+                }
+            }
+            this.goodsForm.pictureUrls = pictureUrls;
+        },
+        // 图片上传成功
+        fileSuccess(response, file, fileList) {
+            this.fileList.push(file);
+            if(this.goodsForm.pictureUrls) {
+                this.goodsForm.pictureUrls += ',' + response.data;
+            } else {
+                this.goodsForm.pictureUrls = response.data;
+            }
+        },
         // 切换类目
         categoryChange(obj) {
             this.goodsForm.goodsCategoryId = obj[obj.length -1];
