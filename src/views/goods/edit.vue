@@ -83,7 +83,7 @@
                         <div v-show="priceErrorFlag" class="el-form-item__error">请输入价格</div>
                     </el-form-item>
                     <el-form-item label="库存">
-                        <el-input-number style="width:200px" :min="0" :max="99999999" :precision="0" v-model="goodsForm.inventory" />
+                        <el-input-number style="width:200px" :min="1" :max="99999999" :precision="0" v-model="goodsForm.inventory" />
                     </el-form-item>
                 </div>
                 <el-form-item label="限购">
