@@ -7,7 +7,7 @@
             <el-form :inline="true" :model="query" class="mt20">
                 <el-form-item label="类型">
                     <el-select v-model="query.couponType" placeholder="全部">
-                        <el-option value=''>全部</el-option>
+                        <el-option value='' label="全部"></el-option>
                         <el-option
                             v-for="item in couponTypeOptions"
                             :key="item.value"

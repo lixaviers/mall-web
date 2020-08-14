@@ -60,7 +60,7 @@
             getShopInfo() {
                 API.operationShopInfo().then((res)=> {
                     this.shopInfoForm = res.data;
-                    this.shopInfoForm.createTime = Util.dateFormatter(res.data.createTime);
+                    // this.shopInfoForm.createTime = Util.dateFormatter(res.data.createTime);
                 });
             },
         }

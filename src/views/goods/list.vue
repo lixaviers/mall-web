@@ -8,6 +8,13 @@
                 <el-form-item label="商品名称">
                     <el-input v-model="query.goodsNameLike" placeholder="商品名称"></el-input>
                 </el-form-item>
+                <el-form-item label="类型">
+                    <el-select v-model="query.goodsStatus" placeholder="全部" style="width: 100px;">
+                        <el-option value='' label="全部"></el-option>
+                        <el-option :value='1' label="上架"></el-option>
+                        <el-option :value='2' label="下架"></el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="getGoodsList">查询</el-button>
                 </el-form-item>
@@ -65,7 +72,7 @@ export default {
                 pageSize: 20,
                 total: 0,
                 goodsNameLike: '',
-                sales: '',
+                goodsStatus: '',
                 orderBy: 'id DESC',
             }
         }

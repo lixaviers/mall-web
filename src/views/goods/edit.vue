@@ -224,7 +224,6 @@ export default {
                 // 获取商品类目
                 this.getGoodsBrandList();
                 this.goodsForm.listPrice = res.data.listPrice;
-                this.goodsForm.inventory = res.data.inventory;
                 this.goodsForm.minimumQuantity = res.data.minimumQuantity;
                 this.goodsForm.originalPrice = res.data.originalPrice;
                 this.goodsForm.skuList = res.data.skuList;
@@ -246,6 +245,7 @@ export default {
                     }
                     this.specPrices = arr;
                 } else {
+                    this.goodsForm.inventory = res.data.skuList[0].inventory;
                     this.specifications = [];
                     this.specifications.push({name: "", values: []});
                     this.specPrices = [];
