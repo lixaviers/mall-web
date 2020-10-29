@@ -1,7 +1,7 @@
 import Http from "./axios";
 const operation = "/api/operation-b";
 const user = "/api/user-b";
-const goods = "/api/goods-b";
+const goods = "/api/goods-b/b";
 const mmc = "/api/mmc-b";
 
 
@@ -60,35 +60,49 @@ export default {
 
 
     // ---------商品中心相关---------
+    goodsCategoryGet(type) {
+        return Http.get(`${goods}/goodsCategory/get/${type}`);
+    },
     // 获取商品类目树
     goodsCategoryGetTree(type) {
-        return Http.get(`${goods}/b/goodsCategory/getTree/${type}`);
+        return Http.get(`${goods}/goodsCategory/getTree/${type}`);
+    },
+    goodsCategoryGetByParentId(parentId, type) {
+        return Http.get(`${goods}/goodsCategory/getByParentId/${parentId}/${type}`);
+    },
+    // 获取商品类目属性列表信息
+    goodsCategoryAttributeGetTreeByCategoryId(categoryId) {
+        return Http.get(`${goods}/goodsCategoryAttribute/getTreeByCategoryId/${categoryId}`);
+    },
+    // 获取最近发布的商品类目
+    getGoodsCategoryRecentlyReleasedGoodsCategory() {
+        return Http.get(`${goods}/goodsCategory/getRecentlyReleasedGoodsCategory`);
     },
     // 创建商品
     goodsAdd(params) {
-        return Http.post(`${goods}/b/goods/addOrUpdate`, params);
+        return Http.post(`${goods}/goods/addOrUpdate`, params);
     },
     // 查询商品
     goodsQuery(params) {
-        return Http.post(`${goods}/b/goods/query`, params);
+        return Http.post(`${goods}/goods/query`, params);
     },
     goodsSkuQuery(params) {
-        return Http.post(`${goods}/b/goodsSku/query`, params);
+        return Http.post(`${goods}/goodsSku/query`, params);
     },
     // 查询商品
     goodsGet(id) {
-        return Http.get(`${goods}/b/goods/get/${id}`);
+        return Http.get(`${goods}/goods/get/${id}`);
     },
     goodsSkuGet(skuCode) {
-        return Http.get(`${goods}/b/goodsSku/get?skuCode=${skuCode}`);
+        return Http.get(`${goods}/goodsSku/get?skuCode=${skuCode}`);
     },
     // 查询商品
     goodsShelves(id, opt) {
-        return Http.post(`${goods}/b/goods/shelves/${id}/${opt}`);
+        return Http.post(`${goods}/goods/shelves/${id}/${opt}`);
     },
     // 查询商品品牌
     goodsBrandGet(categoryId) {
-        return Http.get(`${goods}/b/goodsBrand/get/${categoryId}`);
+        return Http.get(`${goods}/goodsBrand/get/${categoryId}`);
     },
 
     // ---------营销中心相关---------

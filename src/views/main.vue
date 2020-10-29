@@ -7,8 +7,8 @@
     </div>
 </template>
 <script>
-    import MainContent from './main-content'
-    import MainSidebar from './main-sidebar'
+    import MainContent from './mainContent'
+    import MainSidebar from './mainSidebar'
     export default {
         components: {
             MainContent,

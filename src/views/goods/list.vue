@@ -2,7 +2,7 @@
     <div>
         <el-card shadow="always">
             <el-row>
-                <el-button type="primary" @click="$router.push({name: 'goodsEdit'});">发布商品</el-button>
+                <el-button type="primary" @click="$router.push({name: 'editGoodsCategory'});">发布商品</el-button>
             </el-row>
             <el-form :inline="true" :model="query" class="mt20">
                 <el-form-item label="商品名称">

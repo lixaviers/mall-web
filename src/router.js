@@ -23,6 +23,14 @@ const globalRoutes = [
       component: (resolve) => require(['./views/common/register.vue'], resolve),
     },
     {
+        path: '/goods/edit', name: 'goodsEdit', component: (resolve) => require(['./views/goods/edit/index.vue'], resolve),
+        meta: {
+            title: '发布商品', isMenu: false, parentName: 'goods', 
+            // 选中的子菜单名称
+            activeName: 'goodsList',
+        }
+    },
+    {
         path: '/shopHeader',
         component: (resolve) => require(['./components/shopHeader.vue'], resolve),
         children: [
@@ -80,7 +88,7 @@ const menuRouters = [
                         }
                     },
                     {
-                        path: 'edit', name: 'goodsEdit', component: (resolve) => require(['./views/goods/edit.vue'], resolve),
+                        path: 'editGoodsCategory', name: 'editGoodsCategory', component: (resolve) => require(['./views/goods/edit/category.vue'], resolve),
                         meta: {
                             title: '发布商品', isMenu: false, parentName: 'goods', 
                             // 选中的子菜单名称
