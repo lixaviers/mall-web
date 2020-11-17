@@ -78,13 +78,19 @@ const menuRouters = [
             {
                 path: '/goods', name: 'goods', redirect: {name: 'goodsList'}, component: (resolve) => require(['./views/index.vue'], resolve),
                 meta: {
-                    title: '商品', subTitle: '商品管理',
+                    title: '商品', subTitle: '商品中心',
                 },
                 children: [
                     {
                         path: 'list', name: 'goodsList', component: (resolve) => require(['./views/goods/list.vue'], resolve),
                         meta: {
                             title: '商品管理', isMenu: true, parentName: 'goods',
+                        }
+                    },
+                    {
+                        path: 'class', name: 'goodsClassList', component: (resolve) => require(['./views/goods/class/index.vue'], resolve),
+                        meta: {
+                            title: '商品分类', isMenu: true, parentName: 'goods',
                         }
                     },
                     {

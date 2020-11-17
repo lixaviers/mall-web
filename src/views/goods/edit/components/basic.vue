@@ -9,6 +9,9 @@
                     <el-form-item label="商品名" prop="goodsName" :rules="{ required: true, message: '请输入商品名称', trigger: 'blur' }">
                         <el-input v-model="goodsForm.goodsName" placeholder="商品名" style="width: 400px" maxlength="50" show-word-limit></el-input>
                     </el-form-item>
+                    <el-form-item label="商品分类" prop="goodsClassId">
+                        <el-cascader v-model="goodsClassSeletedList" :options="goodsClassList" @change="goodsClassChange" :props="{ expandTrigger: 'hover', label: 'className', value: 'id' }"></el-cascader>
+                    </el-form-item>
                     <el-form-item label="类目属性" class="goods__attribute">
                         <div style="color:#949494;font-size: 12px;">错误填写商品属性，可能会引起商品下架或搜索流量减少，影响您的正常销售，请认真准确填写！</div>
                         <el-row class="attribute__container">
@@ -54,19 +57,23 @@ export default {
     },
     data () {
         return {
+            goodsClassSeletedList: [],
             goodsBrandList: [],
+            goodsClassList: [],
         }
     },
     created() {
         if(!this.isEdit) {
             this.getGoodsBrandList();
             this.goodsCategoryAttributeGetTreeByCategoryId();
+            this.getGoodsClassList();
         }
     },
     methods: {
         getDataList() {
             this.getGoodsBrandList();
             this.goodsCategoryAttributeGetTreeByCategoryId();
+            this.getGoodsClassList();
         },
         // 获取商品品牌列表
         getGoodsBrandList() {
@@ -95,6 +102,42 @@ export default {
             this.$refs[formName].validate((valid) => {
                 console.log('valid', valid);
             });
+        },
+        // 获取商品分类列表
+        getGoodsClassList() {
+            Api.goodsClassQuery({pageSize: 10000000}).then((res)=> {
+                if(res.data.records) {
+                    let goodsClassId = this.goodsForm.goodsClassId;
+                    if(goodsClassId && goodsClassId != 0) {
+                        // 回显商品分类
+                        this.getGoodsClassSeletedList(goodsClassId, res.data.records);
+                        if(this.goodsClassSeletedList && this.goodsClassSeletedList.length > 1) {
+                            let list = [];
+                            for(var i = this.goodsClassSeletedList.length -1; i>=0 ; i--) {
+                                list.push(this.goodsClassSeletedList[i]);
+                            }
+                            this.goodsClassSeletedList = list;
+                        }
+                    }
+                    this.goodsClassList = Util.treeDataTranslate(res.data.records);
+                } else {
+                    this.goodsClassList = [];
+                }
+            });
+        },
+        getGoodsClassSeletedList(id, list) {
+            list.forEach(item => {
+                console.log('id', id);
+                if(id == item.id) {
+                    this.goodsClassSeletedList.push(item.id);
+                    if(item.parentId != 0) {
+                        this.getGoodsClassSeletedList(item.parentId, list);
+                    }
+                }
+            });
+        },
+        goodsClassChange(obj) {
+            this.goodsForm.goodsClassId = obj[obj.length -1];
         }
     }
 }

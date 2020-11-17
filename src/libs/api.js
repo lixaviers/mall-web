@@ -96,13 +96,26 @@ export default {
     goodsSkuGet(skuCode) {
         return Http.get(`${goods}/goodsSku/get?skuCode=${skuCode}`);
     },
-    // 查询商品
+    // 商品上下架
     goodsShelves(id, opt) {
         return Http.post(`${goods}/goods/shelves/${id}/${opt}`);
     },
     // 查询商品品牌
     goodsBrandGet(categoryId) {
         return Http.get(`${goods}/goodsBrand/get/${categoryId}`);
+    },
+    // 查询商品分类
+    goodsClassQuery(params) {
+        return Http.post(`${goods}/goodsClass/query`, params);
+    },
+    goodsClassAddOrUpdate(params) {
+        return Http.post(`${goods}/goodsClass/addOrUpdate`, params);
+    },
+    goodsClassGet(id) {
+        return Http.get(`${goods}/goodsClass/get/${id}`);
+    },
+    goodsClassDelete(id) {
+        return Http.post(`${goods}/goodsClass/delete/${id}`);
     },
 
     // ---------营销中心相关---------

@@ -102,6 +102,7 @@ export default {
                     this.goodsForm.isPerPersonLimit = true;
                 }
                 this.goodsForm.goodsName = res.data.goodsName;
+                this.goodsForm.goodsClassId = res.data.goodsClassId;
                 this.goodsForm.goodsCategoryId = res.data.goodsCategoryId;
                 this.goodsForm.attributeList = res.data.attributeList;
                 if(goodsCategoryId) {

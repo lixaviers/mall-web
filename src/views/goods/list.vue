@@ -8,6 +8,9 @@
                 <el-form-item label="商品名称">
                     <el-input v-model="query.goodsNameLike" placeholder="商品名称"></el-input>
                 </el-form-item>
+                <el-form-item label="商品分类">
+                    <el-cascader :options="goodsClassList" @change="goodsClassChange" :props="{ expandTrigger: 'hover', label: 'className', value: 'id' }"></el-cascader>
+                </el-form-item>
                 <el-form-item label="类型">
                     <el-select v-model="query.goodsStatus" placeholder="全部" style="width: 100px;">
                         <el-option value='' label="全部"></el-option>
@@ -66,19 +69,21 @@ import API from '../../libs/api.js';
 export default {
     data () {
         return {
+            goodsClassList: [],
             goodsList: [],
             query: {
                 pageNo: 1,
                 pageSize: 20,
                 total: 0,
                 goodsNameLike: '',
+                goodsClassId: '',
                 goodsStatus: '',
                 orderBy: 'id DESC',
             }
         }
     },
     created() {
-        this.getGoodsList();
+        this.getGoodsClassList();
     },
     methods: {
         // 编辑商品
@@ -115,6 +120,21 @@ export default {
                 this.goodsList = res.data.records;
             });
         },
+        // 获取商品分类列表
+        getGoodsClassList() {
+            API.goodsClassQuery({pageSize: 10000000}).then((res)=> {
+                if(res.data.records) {
+                    console.log(res.data.records);
+                    this.goodsClassList = Util.treeDataTranslate(res.data.records);
+                    this.getGoodsList();
+                } else {
+                    this.goodsClassList = [];
+                }
+            });
+        },
+        goodsClassChange(obj) {
+            this.query.goodsClassId = obj[obj.length -1];
+        }
     }
 }
 </script>

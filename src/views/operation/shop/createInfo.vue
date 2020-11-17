@@ -64,7 +64,6 @@
                 props: {
                     lazy: true,
                     lazyLoad(node, resolve) {
-                        console.log(node);
                         if(node.value) {
                             API.operationGetAddress(node.value).then((res)=> {
                                 let list = [];
