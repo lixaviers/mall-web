@@ -24,7 +24,7 @@
             <p class="title">常用工具</p>
             <el-row class="ssgk cygj">
                 <el-col :span="6" class="item">
-                    <a @click="$router.push({name: 'goodsEdit'})">发布商品</a>
+                    <a @click="$router.push({name: 'editGoodsCategory'});">发布商品</a>
                 </el-col>
                 <el-col :span="6" class="item">
                     <a>会员管理</a>

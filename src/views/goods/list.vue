@@ -1,32 +1,37 @@
 <template>
     <div>
-        <el-card shadow="always">
-            <el-row>
-                <el-button type="primary" @click="$router.push({name: 'editGoodsCategory'});">发布商品</el-button>
-            </el-row>
-            <el-form :inline="true" :model="query" class="mt20">
-                <el-form-item label="商品名称">
-                    <el-input v-model="query.goodsNameLike" placeholder="商品名称"></el-input>
-                </el-form-item>
+        <el-card shadow="never" style="border:0">
+            <el-form :inline="true" :model="query" class="">
                 <el-form-item label="商品分类">
-                    <el-cascader :options="goodsClassList" @change="goodsClassChange" :props="{ expandTrigger: 'hover', label: 'className', value: 'id' }"></el-cascader>
+                    <el-cascader v-model="goodsClassSelectedList" :options="goodsClassList" @change="goodsClassChange" 
+                    :props="{ expandTrigger: 'hover', label: 'className', value: 'id' }" clearable
+                    :show-all-levels="false"
+                    ></el-cascader>
                 </el-form-item>
                 <el-form-item label="类型">
-                    <el-select v-model="query.goodsStatus" placeholder="全部" style="width: 100px;">
+                    <el-select v-model="query.goodsStatus" placeholder="全部" style="width: 100px;" @change="getGoodsList">
                         <el-option value='' label="全部"></el-option>
                         <el-option :value='1' label="上架"></el-option>
                         <el-option :value='2' label="下架"></el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item>
-                    <el-button type="primary" @click="getGoodsList">查询</el-button>
+                <el-form-item label="">
+                    <el-input clearable v-model="query.goodsNameLike" placeholder="搜索商品名称" @clear="getGoodsList" @keyup.enter.native="getGoodsList">
+                        <el-button slot="append" icon="el-icon-search" @click="getGoodsList" ></el-button>
+                    </el-input>
                 </el-form-item>
+                <el-form-item label="">
+                    <el-button icon="el-icon-refresh-left" @click="clearSearch" >重置</el-button>
+                </el-form-item>
+                <div style="float: right;">
+                    <el-button type="primary" @click="$router.push({name: 'editGoodsCategory'});" icon="el-icon-plus" plain>发布商品</el-button>
+                </div>
             </el-form>
             <el-table
-                :data="goodsList"
-                style="width: 100%"
+                v-loading="loading" :data="goodsList" style="width: 100%"
+                border :header-cell-style="headerCellStyle"
             >
-                <el-table-column prop="goodsName" label="商品名称"></el-table-column>
+                <el-table-column prop="goodsName" label="商品名称" :show-overflow-tooltip="true"></el-table-column>
                 <el-table-column prop="inventory" label="库存" sortable width="100"></el-table-column>
                 <el-table-column prop="viewCount" label="浏览量" sortable width="100"></el-table-column>
                 <el-table-column prop="sales" label="销量" sortable width="100"></el-table-column>
@@ -69,8 +74,10 @@ import API from '../../libs/api.js';
 export default {
     data () {
         return {
+            loading: false,
             goodsClassList: [],
             goodsList: [],
+            goodsClassSelectedList: [],
             query: {
                 pageNo: 1,
                 pageSize: 20,
@@ -105,20 +112,24 @@ export default {
             this.query.pageNo = val;
             this.getGoodsList();
         },
+        clearSearch() {
+            this.query.goodsNameLike= '';
+            this.query.goodsClassId= '';
+            this.query.goodsStatus= '';
+            this.goodsClassSelectedList = [];
+            this.getGoodsList();
+        },
         // 获取商品列表
         getGoodsList() {
+            this.loading = true;
             API.goodsQuery(this.query).then((res)=> {
-                console.log(res.data)
                 this.query.pageNo = res.data.pageNo;
                 this.query.pageSize = res.data.pageSize;
                 this.query.total = res.data.totalRecords;
-                //if(res.data.totalRecords > 0) {
-                    //res.data.records.forEach(item => {
-                        //item.createTime = Util.dateFormatter(item.createTime);
-                    //});
-                //}
                 this.goodsList = res.data.records;
-            });
+            }).finally((res) => {
+                if(this.loading)this.loading = false;
+            });;
         },
         // 获取商品分类列表
         getGoodsClassList() {
@@ -134,7 +145,14 @@ export default {
         },
         goodsClassChange(obj) {
             this.query.goodsClassId = obj[obj.length -1];
+            this.getGoodsList();
+        },
+        // 更改表头样式
+        headerCellStyle({ row, column, rowIndex, columnIndex }) {
+        if (rowIndex === 0) {
+            return "background-color: #fafafa;color: #000;font-weight: 500; text-align: center";
         }
+        },
     }
 }
 </script>
